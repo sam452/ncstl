@@ -52,7 +52,9 @@
 <body >
 <div id="wrapper" class="hfeed">
 	<div id="header">
-
+<header>
+    <h1>NC & StL Preservation Society Inc</h1>
+  </header>
 
 
 
