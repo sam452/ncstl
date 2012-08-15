@@ -44,7 +44,7 @@
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 </head>
 
-<body >
+<body>
 <div id="wrapper">
 	<div id="header">
 
