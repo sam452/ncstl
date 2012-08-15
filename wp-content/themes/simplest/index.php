@@ -10,7 +10,7 @@
     <?php wp_head(); ?>
   </head>
   <body <?php body_class(); ?>>
-    <div id="container">
+    <div id="container">This is container
       <div id="header">
         <h1><a href="<?php bloginfo('url'); ?>"><?php bloginfo( 'name' ); ?></a></h1>
         <p id="description"><?php bloginfo( 'description' ); ?></p>
@@ -53,6 +53,7 @@
         <?php endif; ?>
         <div class="clear"> </div>
       </div><!-- content -->
+      <footer>Footer content here</footer>
     </div><!-- container -->
     <?php wp_footer(); ?>
   </body>

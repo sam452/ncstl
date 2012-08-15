@@ -9,4 +9,5 @@
     'after_widget' => '</div><!-- widget -->',
     'before_title' => '<h4>',
     'after_title' => '</h4>') );
+add_custom_background();
 ?>
