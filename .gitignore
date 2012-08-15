@@ -17,3 +17,5 @@ readme.html
 license.txt
 # Mac finder artifacts
 .DS_Store
+
+wp-content/themes/train/page.php
