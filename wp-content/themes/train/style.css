@@ -82,6 +82,7 @@ DESCRIPTION: Two-column fixed layout with one sidebar right of content
 #footer {
 	clear: both;
 	width: 100%;
+	bgcolor: #D80000;
 }
 
 /*
