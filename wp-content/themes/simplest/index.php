@@ -21,6 +21,8 @@
       </div><!-- header -->
 
       <div id="content">
+        <!--<div class='train'><img src="<?php echo get_template_directory_uri(); ?>/img/576.jpg" width="767" height="400" alt="576" />
+        </div>-->
         <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
           <div <?php post_class(); ?>>
             <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
@@ -54,6 +56,7 @@
           <div class="right"><?php previous_posts_link( 'Newer posts &raquo;' ); ?></div>
         <?php endif; ?>
         <div class="clear"> </div>
+
       </div><!-- content -->
       
       
