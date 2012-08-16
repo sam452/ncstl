@@ -12,12 +12,14 @@
   <body <?php body_class(); ?>>
     <div id="container">This is container
       <div id="header">
-        <h1><a href="<?php bloginfo('url'); ?>"><?php bloginfo( 'name' ); ?></a></h1>
+        <header>Header content here</header>
+       <h1><a href="<?php bloginfo('url'); ?>"><?php bloginfo( 'name' ); ?></a></h1>
         <p id="description"><?php bloginfo( 'description' ); ?></p>
         <?php if ( has_nav_menu( 'menu' ) ) : wp_nav_menu(); else : ?>
           <ul><?php wp_list_pages( 'title_li=&depth=-1' ); ?></ul>
-        <?php endif; ?>
+        <?php endif; ?> 
       </div><!-- header -->
+
       <div id="content">
         <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
           <div <?php post_class(); ?>>
