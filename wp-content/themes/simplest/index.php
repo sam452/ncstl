@@ -62,8 +62,40 @@
         NC&StL Preservation Society, Inc. is in no way affiliated with the NC&StL Railway or any of its successors. As a non-profit entity, NCPS presents these pages to the public purely for educational and historic interest.
         </span>
         </div>
-        <div class="footerLinks">links here1</div>
-        <div class="footerLinks">links here2</div>
+        <div class="footerLinks">
+          <ul>
+            <li>
+            <a class="footerLinkText" href="/ncstl/about_us/" name="about">About us</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/category/history_memorabilia/">History / Memorabilia</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/category/locomotives_equipment/">Locomotives / Equipment</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/category/merchandise/">Merchandise</a>
+            </li>
+          </ul>
+
+        </div>
+        <div class="footerLinks">
+          <ul>
+            <li>
+            <a class="footerLinkText" href="/ncstl/contact/" name="contact">Contact us</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/category/events/">Events</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/category/members/">Members only</a>
+            </li>
+            <li>
+            <a class="footerLinkText" href="/ncstl/privacy-policy/" name="privacy">Privacy policy</a>
+            </li>
+          </ul>
+
+        </div>
         <div class="pPal">Please take a moment to send a tax-deductible contribution to NCPS.
           <br>
             We can't do it without your help!
