@@ -68,7 +68,7 @@
         <div class="footerLinks">
           <ul>
             <li>
-            <a class="footerLinkText" href="/ncstl/about_us/" name="about">About us</a>
+            <a class="footerLinkText" href="/ncstl/about-us/" name="about">About us</a>
             </li>
             <li>
             <a class="footerLinkText" href="/ncstl/category/history_memorabilia/">History / Memorabilia</a>
