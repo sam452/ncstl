@@ -10,15 +10,105 @@
     <?php wp_head(); ?>
   </head>
   <body <?php body_class(); ?>>
-    <div id="container">This is container
-      <div id="header">
-        <header>Header content here</header>
-       <h1><a href="<?php bloginfo('url'); ?>"><?php bloginfo( 'name' ); ?></a></h1>
+    <div id="container"><!--This is container-->
+      <div id="header-container"><!--3:25pm added to test header container-->
+      <div id="header" class="chrome-center"> <!--3:25pm added to test header-->
+
+
+       <header><!--Header content here -->
+            <!--<div class ="bogus">
+               <?php bloginfo( 'name' )?> 
+            </div> bogus div--> 
+  
+  <div class="bLogo"><img src="<?php echo get_template_directory_uri(); ?>/img/bowtie.gif" width="100%" height="72" alt="NCStL logo" />
+    </div>
+    <div class="576Logo"><img src="<?php echo get_template_directory_uri(); ?>/img/576park_da.jpg" width="77%" height="100" alt="576 logo" />
+        </div>
+
+  <div class="bloginfo">
+        <h1 style="text-align: center;"><?php bloginfo( 'name' ); ?></h1>
+      </div>
+        </header>
+       
+  <ul id="nav" class="clearfix">
+      <li id="nav_about">
+      <a href="/about/index.htm">
+      <span></span>
+    About
+      </a>
+    </li>
+  <li id="nav_history">
+      <a href="/history/">
+      <span></span>
+    History
+      </a>
+    <ul>
+      <li>
+        <a href="/history/cities.htm">Cities</a>
+      </li>
+    <li>
+    <a href="/history/memoribilia.htm">Memoribilia</a>
+  </li>
+  </ul>
+    </li>
+    <li id="nav_people">
+      <a href="/people/">
+        <span></span>
+        People
+      </a>
+    </li>
+  <li id="nav_loco">
+    <a href="/locomotive/">
+      <span></span>
+      Locomotive
+    </a>
+    <ul>
+      <li>
+        <a href="/locomotive/equipment.htm">Equipment</a>
+      </li>
+    </ul>
+  </li>
+  <li id="nav_contact">
+    <a href="/contact/">
+      <span></span>
+      Contact Us
+    </a>
+    <ul>
+      <li>
+        <a href="/contact/donate.htm">Donate</a>
+      </li>
+    </ul>
+  </li>
+  <li id="nav_events">
+    <a href="/events/">
+      <span></span>
+      Events
+    </a>
+  </li>
+  <li id="nav_576">
+    <a href="/576/">
+      <span></span>
+      The 576
+    </a>
+  </li>
+  <li id="nav_members">
+    <a href="/members/">
+      <span></span>
+      Members
+    </a>
+  </li>
+<br/>
+</ul>
+</div>
+</div>
+
+
+
         <p id="description"><?php bloginfo( 'description' ); ?></p>
         <?php if ( has_nav_menu( 'menu' ) ) : wp_nav_menu(); else : ?>
           <ul><?php wp_list_pages( 'title_li=&depth=-1' ); ?></ul>
         <?php endif; ?> 
-      </div><!-- header -->
+      <!--</div><!-- header -->
 
       <div id="content">
         <!--<div class='train'><img src="<?php echo get_template_directory_uri(); ?>/img/576.jpg" width="767" height="400" alt="576" />
