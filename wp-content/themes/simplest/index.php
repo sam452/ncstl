@@ -15,11 +15,9 @@
       <div id="header" class="chrome-center"> <!--3:25pm added to test header-->
 
 
-       <header><!--Header content here -->
-            <!--<div class ="bogus">
-               <?php bloginfo( 'name' )?> 
-            </div> bogus div--> 
-  
+       <!-- removed extra header -->
+
+
   <div class="bLogo"><img src="<?php echo get_template_directory_uri(); ?>/img/bowtie.gif" width="100%" height="72" alt="NCStL logo" />
     </div>
     <div class="576Logo"><img src="<?php echo get_template_directory_uri(); ?>/img/576park_da.jpg" width="77%" height="100" alt="576 logo" />
@@ -28,79 +26,37 @@
   <div class="bloginfo">
         <h1 style="text-align: center;"><?php bloginfo( 'name' ); ?></h1>
       </div>
-        </header>
+        
        
-  <ul id="nav" class="clearfix">
-      <li id="nav_about">
-      <a href="/about/index.htm">
-      <span></span>
-    About
-      </a>
+  <!--<ul id="nav" class="clearfix"> hid to check function-->
+  <ul class="clearfix" id="nav"> <!--renamed to check function, adds space before sample page-->
+      <li id="nav_about"><a href="/about/index.htm"><span></span>About</a></li>
+  <li id="nav_history"><a href="/history.htm/"><span></span>History</a>
+      <ul>
+        <li><a href="/history/cities.htm/">Cities</a></li>
+        <li><a href="/history/memoribilia.htm/">Memoribilia</a></li>
+      </ul>
     </li>
-  <li id="nav_history">
-      <a href="/history/">
-      <span></span>
-    History
-      </a>
-    <ul>
-      <li>
-        <a href="/history/cities.htm">Cities</a>
-      </li>
-    <li>
-    <a href="/history/memoribilia.htm">Memoribilia</a>
-  </li>
-  </ul>
-    </li>
-    <li id="nav_people">
-      <a href="/people/">
-        <span></span>
-        People
-      </a>
-    </li>
-  <li id="nav_loco">
-    <a href="/locomotive/">
-      <span></span>
-      Locomotive
-    </a>
+  <li id="nav_people"><a href="/people.htm/"><span></span>People</a></li>
+  <li id="nav_locomotive"><a href="/locomotive.htm/"><span></span>Locomotive</a>
     <ul>
       <li>
         <a href="/locomotive/equipment.htm">Equipment</a>
       </li>
     </ul>
   </li>
-  <li id="nav_contact">
-    <a href="/contact/">
-      <span></span>
-      Contact Us
-    </a>
+  <li id="nav_contact"><a href="/contact.htm/"><span></span>Contact Us</a>
     <ul>
-      <li>
-        <a href="/contact/donate.htm">Donate</a>
-      </li>
+      <li><a href="/contact/donate.htm">Donate</a></li>
     </ul>
   </li>
-  <li id="nav_events">
-    <a href="/events/">
-      <span></span>
-      Events
-    </a>
-  </li>
-  <li id="nav_576">
-    <a href="/576/">
-      <span></span>
-      The 576
-    </a>
-  </li>
-  <li id="nav_members">
-    <a href="/members/">
-      <span></span>
-      Members
-    </a>
-  </li>
-<br/>
-</ul>
-</div>
-</div>
+  <li id="nav_events"><a href="/events.htm/"><span></span>Events</a></li>
+  <li id="nav_576"><a href="/576/"><span></span>The 576</a></li>
+  <li id="nav_members"><a href="/members/"><span></span>Members</a></li>
+<!--<br/>-->
+<!--</ul>-->
+</div><!--end of header-->
+</div><!--end of header container-->
 
 
 
