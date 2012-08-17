@@ -30,14 +30,14 @@
        
   <!--<ul id="nav" class="clearfix"> hid to check function-->
   <ul class="clearfix" id="nav"> <!--renamed to check function, adds space before sample page-->
-      <li id="nav_about"><a href="/about/index.htm"><span></span>About</a></li>
-  <li id="nav_history"><a href="/history.htm/"><span></span>History</a>
+      <li id="nav_about"><a href="/about/index.htm"><span>About</span></a></li>
+  <li id="nav_history"><a href="/history.htm/"><span>History</span></a>
       <ul>
         <li><a href="/history/cities.htm/">Cities</a></li>
         <li><a href="/history/memoribilia.htm/">Memoribilia</a></li>
       </ul>
     </li>
-  <li id="nav_people"><a href="/people.htm/"><span></span>People</a></li>
+  <li id="nav_people"><a href="/people.htm/"><span>People</span></a></li>
   <li id="nav_locomotive"><a href="/locomotive.htm/"><span></span>Locomotive</a>
     <ul>
       <li>
@@ -45,14 +45,14 @@
       </li>
     </ul>
   </li>
-  <li id="nav_contact"><a href="/contact.htm/"><span></span>Contact Us</a>
+  <li id="nav_contact"><a href="/contact.htm/"><span>Contact Us</span></a>
     <ul>
       <li><a href="/contact/donate.htm">Donate</a></li>
     </ul>
   </li>
   <li id="nav_events"><a href="/events.htm/"><span></span>Events</a></li>
   <li id="nav_576"><a href="/576/"><span></span>The 576</a></li>
-  <li id="nav_members"><a href="/members/"><span></span>Members</a></li>
+  <li id="nav_members"><a href="/members/"><span>Members</span></a></li>
 <!--<br/>-->
 <!--</ul>-->
 </div><!--end of header-->
