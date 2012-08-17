@@ -36,7 +36,7 @@ sub {top:0.5ex;}
 body {bgcolor: #006699; color:#111; font-family: Helvetica, Arial, sans-serif;}
 a {color:#111;}
 p {line-height:1.3em;}
-h1 {font-size:1.7em;}
+h1 {font-size:1.7em; color: #FF0000;}
 h2 {font-size:1.3em;}
 h3 {font-size:1.1em;}
 h1 a {text-decoration:none;}
