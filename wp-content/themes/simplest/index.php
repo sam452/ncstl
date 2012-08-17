@@ -25,55 +25,18 @@
 
   <div class="bloginfo">
         <h1 style="text-align: center;"><?php bloginfo( 'name' ); ?></h1>
-      </div>
+              <p id="description"><?php bloginfo( 'description' ); ?></p>
+    </div> <!--- blog info div -->
         
+      <nav>
+      <?php wp_nav_menu( array( 'sort_column' => 'menu_order', 'menu_class' => 'nav', 'theme_location' => 'primary-menu' ) ) ?>
+      </nav>
        
-  <!--<ul id="nav" class="clearfix"> hid to check function-->
-  <ul class="clearfix" id="nav"> <!--renamed to check function, adds space before sample page-->
-      <li id="nav_about"><a href="/about/index.htm"><span>About</span></a></li>
-  <li id="nav_history"><a href="/history.htm/"><span>History</span></a>
-      <ul>
-        <li><a href="/history/cities.htm/">Cities</a></li>
-        <li><a href="/history/memoribilia.htm/">Memoribilia</a></li>
-      </ul>
-    </li>
-  <li id="nav_people"><a href="/people.htm/"><span>People</span></a></li>
-  <li id="nav_locomotive"><a href="/locomotive.htm/"><span></span>Locomotive</a>
-    <ul>
-      <li>
-        <a href="/locomotive/equipment.htm">Equipment</a>
-      </li>
-    </ul>
-  </li>
-  <li id="nav_contact"><a href="/contact.htm/"><span>Contact Us</span></a>
-    <ul>
-      <li><a href="/contact/donate.htm">Donate</a></li>
-    </ul>
-  </li>
-  <li id="nav_events"><a href="/events.htm/"><span></span>Events</a></li>
-  <li id="nav_576"><a href="/576/"><span></span>The 576</a></li>
-  <li id="nav_members"><a href="/members/"><span>Members</span></a></li>
-<!--<br/>-->
-<!--</ul>-->
 </div><!--end of header-->
 </div><!--end of header container-->
 
 
 
-        <p id="description"><?php bloginfo( 'description' ); ?></p>
-<<<<<<< HEAD
-        <?php if ( has_nav_menu( 'menu' ) ) : wp_nav_menu(); else : ?>
-          <ul><?php wp_list_pages( 'title_li=&depth=-1' ); ?></ul>
-        <?php endif; ?> 
-      <!--</div><!-- header -->
-=======
-      </div><!-- header -->
-      
-      
-      <nav>
-      <?php wp_nav_menu( array( 'sort_column' => 'menu_order', 'menu_class' => 'nav', 'theme_location' => 'primary-menu' ) ) ?>
-      </nav>
->>>>>>> nab bar set: prior to extracting footer.php
 
       <div id="content">
         <!--<div class='train'><img src="<?php echo get_template_directory_uri(); ?>/img/576.jpg" width="767" height="400" alt="576" />
