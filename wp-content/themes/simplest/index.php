@@ -61,10 +61,19 @@
 
 
         <p id="description"><?php bloginfo( 'description' ); ?></p>
+<<<<<<< HEAD
         <?php if ( has_nav_menu( 'menu' ) ) : wp_nav_menu(); else : ?>
           <ul><?php wp_list_pages( 'title_li=&depth=-1' ); ?></ul>
         <?php endif; ?> 
       <!--</div><!-- header -->
+=======
+      </div><!-- header -->
+      
+      
+      <nav>
+      <?php wp_nav_menu( array( 'sort_column' => 'menu_order', 'menu_class' => 'nav', 'theme_location' => 'primary-menu' ) ) ?>
+      </nav>
+>>>>>>> nab bar set: prior to extracting footer.php
 
       <div id="content">
         <!--<div class='train'><img src="<?php echo get_template_directory_uri(); ?>/img/576.jpg" width="767" height="400" alt="576" />

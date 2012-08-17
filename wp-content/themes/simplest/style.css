@@ -87,6 +87,72 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
   font-size: 10px;
 }
 
+.nav{
+    width:766px;
+    background: #000;
+    display:block;
+    float:left;
+    position:relative;
+}
+ 
+.nav ul{
+    list-style:none;
+}
+ 
+.nav li{
+    float:left;
+    position:relative;
+}
+
+.nav a{
+    display:block;
+    text-decoration:none;
+    color:#fff;
+    padding:0 5px 10px 0;
+    font-size:13px; 
+    font-weight:bold;
+}
+ 
+.nav ul ul, .sub-menu {
+	display: none;
+	position:absolute;
+    top:100%;
+    left:0;
+    float:left;
+    z-index:99999;
+    background: #212121;
+}
+ 
+.nav ul ul ul{
+    top: 30%;
+    left:100%;
+    background: #343434;
+}
+ 
+.nav ul ul a{
+    height:auto;
+    line-height:1em;
+    padding:10px;
+    width:13px;
+}
+ 
+.nav li:hover > a,.nav ul ul:hover > a{
+    color:#ccc;
+}
+ 
+.nav li:hover >.sub-menu {
+    display: block;
+}
+
+.current-menu-item > a,
+.current-menu-ancestor > a,
+.current_page_item > a,
+.current_page_ancestor > a {
+    background:#ff0000 ;
+    font-weight: bold;
+}
+
+
 .widgets {margin-bottom:2em; border-bottom:1px solid #ddd;}
 .widget {margin-bottom:2em;}
 .pagination {text-align:center; margin:2em auto 1em auto;}
