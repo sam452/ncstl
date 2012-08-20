@@ -43,7 +43,7 @@ h1 a {text-decoration:none;}
 h1 a:hover {text-decoration:underline;}
 h1,h2,h3,h4,h5,h6 {clear:both;}
 
-#container {width: 85%; margin:2em auto; background-color: #ffffff; padding:4px 4px;}
+#container {width: 88%; margin:2em auto; background-color: #ffffff; padding:4px 4px;}
 #header #description {margin-top:-1.5em;}
 #header li {display:inline; margin:0 0.5em 0 0;}
 #content {margin-top:4em;}

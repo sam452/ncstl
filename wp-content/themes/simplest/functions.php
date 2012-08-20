@@ -14,44 +14,44 @@
     add_action( 'init', 'register_my_menu' );
     function register_my_menu() {
       register_nav_menu( 'primary-menu', __( 'Primary Menu' ) );
-      
-  add_action( 'init', 'create_my_post_types' );
-    function create_my_post_types() {
-      register_post_type( 'Railroad', 
-		array(
-		       'labels' => array(
-		         'name' => __( 'Train pages' ),
-		      'singular_name' => __( 'Train page' ),
-		      'add_new' => __( 'Add New' ),
-		      'add_new_item' => __( 'Add New Train Page' ),
-		      'edit' => __( 'Edit' ),
-		      'edit_item' => __( 'Edit Train Page' ),
-		      'new_item' => __( 'New Train Page' ),
-		      'view' => __( 'View Train Page' ),
-		      'view_item' => __( 'View Train Page' ),
-		      'search_items' => __( 'Search Railroad Pages' ),
-		      'not_found' => __( 'No Railroad pages found' ),
-		      'not_found_in_trash' => __( 'No Railroad pages found in Trash' ),
-		      'parent' => __( 'History' )
-			 ),
-			  'supports' => array(
-			    'public' => true,
-			    'menu_position' => 105,
-			    'hierarchical' => true,
-			    'taxonomies' => array( 'post_tag', 'category '),
-			    'title',
-			    'editor',
-			    'thumbnail',
-			    'custom-fields',
-			    'page-attributes'
-			  ),		
-			'menu_icon' => get_stylesheet_directory_uri() . '/img/train-button-image.gif',
-		)
-	  );
-     }    //end of custom pages
+   }   
+  function codex_custom_init() {
+  $labels = array(
+    'name' => _x('People', 'The people of the NCStL'),
+    'singular_name' => _x('Person', 'A person of the NCStL'),
+    'add_new' => _x('Add New', 'person'),
+    'add_new_item' => __('Add New Person'),
+    'edit_item' => __('Edit Person'),
+    'new_item' => __('New Person'),
+    'all_items' => __('All People'),
+    'view_item' => __('View Person'),
+    'search_items' => __('Search People'),
+    'not_found' =>  __('No person found'),
+    'not_found_in_trash' => __('No people found in Trash'), 
+    'parent_item_colon' => 'History',
+    'menu_name' => __('People')
+  );
+  $args = array(
+    'labels' => $labels,
+    'public' => true,
+    'publicly_queryable' => true,
+    'show_ui' => true, 
+    'show_in_menu' => true, 
+    'query_var' => true,
+    'rewrite' => true,
+    'capability_type' => 'post',
+    'has_archive' => true, 
+    'hierarchical' => false,
+    'menu_position' => null,
+    'menu_icon' => get_stylesheet_directory_uri() . '/img/people-button-image.gif',
+    'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' )
+  ); 
+  register_post_type('people',$args);
+}
+add_action( 'init', 'codex_custom_init' );    //end of custom pages
     
 
 
 
-}//end of php call
+//end of php call
 ?>
