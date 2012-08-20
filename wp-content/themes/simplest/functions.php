@@ -34,13 +34,22 @@
 		      'not_found_in_trash' => __( 'No Railroad pages found in Trash' ),
 		      'parent' => __( 'History' )
 			 ),
+			  'supports' => array(
+			    'public' => true,
+			    'menu_position' => 105,
+			    'hierarchical' => true,
+			    'taxonomies' => array( 'post_tag', 'category '),
+			    'title',
+			    'editor',
+			    'thumbnail',
+			    'custom-fields',
+			    'page-attributes'
+			  ),		
 			'menu_icon' => get_stylesheet_directory_uri() . '/img/train-button-image.gif',
 		)
 	  );
      }    //end of custom pages
     
-
-
 
 
 
