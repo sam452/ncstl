@@ -19,6 +19,7 @@
       <div id="content">
         <!--<div class='train'><img src="<?php echo get_template_directory_uri(); ?>/img/576.jpg" width="767" height="400" alt="576" />
         </div>-->
+      <div class='subcontent'>  
         <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
           <div <?php post_class(); ?>>
             <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
@@ -42,8 +43,10 @@
         <?php endwhile; else: ?>
           <div class="hentry"><h2>Sorry, the page you requested cannot be found</h2></div>
         <?php endif; ?>
-        <?php if ( is_active_sidebar( 'widgets' ) ) : ?>
-          <div class="widgets"><?php dynamic_sidebar( 'widgets' ); ?></div>
+      </div>  <!--end subcontent-->
+
+        <?php if ( is_active_sidebar( 'primary' ) ) : ?>
+          <div class="sidebar"><?php dynamic_sidebar( 'primary' ); ?></div>
         <?php endif; ?>
         <?php if ( is_singular() || is_404() ) : ?>
           <div class="left"><a href="<?php bloginfo( 'url' ); ?>">&laquo; Home page</a></div>
