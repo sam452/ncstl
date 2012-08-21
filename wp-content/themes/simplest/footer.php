@@ -6,10 +6,10 @@
         <div class="footerLinks">
           <ul>
             <li>
-            <a class="footerLinkText" href="/ncstl/about-us/" name="about">About us</a>
+            <a class="footerLinkText" href="/ncstl/about_us/" name="about">About us</a>
             </li>
             <li>
-            <a class="footerLinkText" href="/ncstl/category/history_memorabilia/">History / Memorabilia</a>
+            <a class="footerLinkText" href="/ncstl/category/history/">History / Memorabilia</a>
             </li>
             <li>
             <a class="footerLinkText" href="/ncstl/category/locomotives_equipment/">Locomotives / Equipment</a>
