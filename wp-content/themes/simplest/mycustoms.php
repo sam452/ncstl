@@ -35,6 +35,41 @@ function people_init() {
 }
 add_action( 'init', 'people_init' );
 
+// Gallery
+function gallery_init() {
+  $labels = array(
+    'name' => _x('Galleries', 'Use this for photo-heavy posts'),
+    'singular_name' => _x('Gallery', 'Use this for photo-heavy posts'),
+    'add_new' => _x('Add New', 'gallery'),
+    'add_new_item' => __('Add New Gallery'),
+    'edit_item' => __('Edit Gallery'),
+    'new_item' => __('New Gallery'),
+    'all_items' => __('All Galleries'),
+    'view_item' => __('View Gallery'),
+    'search_items' => __('Search Galleries'),
+    'not_found' =>  __('No gallery found'),
+    'not_found_in_trash' => __('No gallery found in Trash'), 
+    'menu_name' => __('Galleries')
+  );
+  $args = array(
+    'labels' => $labels,
+    'public' => true,
+    'publicly_queryable' => true,
+    'show_ui' => true, 
+    'show_in_menu' => true, 
+    'query_var' => true,
+    'rewrite' => true,
+    'capability_type' => 'post',
+    'has_archive' => true, 
+    'hierarchical' => false,
+    'menu_position' => null,
+    'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+    'taxonomies' => array('category')
+  ); 
+  register_post_type('galleries',$args);
+}
+add_action( 'init', 'gallery_init' );
+
 // Equipment
 function equipment_init() {
   $labels = array(
@@ -66,7 +101,7 @@ function equipment_init() {
     'menu_position' => null,
     'menu_icon' => get_stylesheet_directory_uri() . '/img/train-button-image.gif',
     'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
-    'taxonomies' => array('steam', 'diesel', 'passenger', 'freight', 'maintenance')
+    'taxonomies' => array('category')
   ); 
   register_post_type('equipment',$args);
 }

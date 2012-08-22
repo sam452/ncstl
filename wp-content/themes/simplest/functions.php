@@ -18,6 +18,37 @@
     
 include 'mycustoms.php';
 
+add_action( 'init', 'register_my_taxonomies', 0 );
+
+function register_my_taxonomies() {
+
+	register_taxonomy(
+		'equipment',
+		array( 'post' ),
+		array(
+			'public' => true,
+			'labels' => array(
+				'name' => __( 'Equipment' ),
+				'singular_name' => __( 'Equipment' ),
+				'query_var' => true,
+				hierarchical => true
+			),
+		)
+	);
+	register_taxonomy(
+		'history',
+		array( 'post' ),
+		array(
+			'public' => true,
+			'labels' => array(
+				'name' => __( 'History' ),
+				'singular_name' => __( 'History' ),
+				'query_var' => true,
+				hierarchical => true
+			),
+		)
+	);
+}
 
 //end of php call
 ?>
