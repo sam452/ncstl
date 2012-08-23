@@ -156,7 +156,7 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
 
 
   #nav ul li a {
-    display: block; padding: 10px 10px;
+    display: block; padding: 15px 20px;
     color: #ffffff; text-decoration: none;
   }
   #nav ul ul {
