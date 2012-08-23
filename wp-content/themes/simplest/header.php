@@ -15,9 +15,65 @@
               <p id="description"><?php bloginfo( 'description' ); ?></p>
     </div> <!--- blog info div -->
         
-      <nav>
+      <!--<nav>
       <?php wp_nav_menu( array( 'sort_column' => 'menu_order', 'menu_class' => 'nav', 'theme_location' => 'primary-menu' ) ) ?>
-      </nav>
+      </nav>-->
+
+      <div id="nav">
+  <ul>
+    <li><a href="#">HOME</a></li>
+    <li><a href="#">ABOUT US</a>
+      <ul>
+        <li><a href="#">CONTACT US</a></li>
+        <li><a href="#">PRIVACY POLICY</a></li>
+        <li><a href="#">LINKS</a>
+          <ul>
+            <li><a href="#">another site</a></li>
+            <li><a href="#">another site</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#">HISTORY</a>
+      <ul>
+        <li><a href="#">CITIES/TRACKS</a></li>
+        <li><a href="#">THE 576</a></li>
+        <li><a href="#">MEMORABILIA</a></li>
+        <li><a href="#">STORIES</a></li>
+        <li><a href="#">ARTICLES</a></li>
+        <li><a href="#">SKETCH</a></li>
+      </ul>
+    </li>
+    <li><a href="#">PEOPLE</a></li>
+    <li><a href="#">LOCOMOTIVES</a>
+      <ul>
+        <li><a href="#">THE 576</a></li>
+        <li><a href="#">STEAM ENGINES</a></li>
+        <li><a href="#">DIESEL ENGINES</a></li>
+        <li><a href="#">PASSENGER TRAINS</a></li>
+        <li><a href="#">FREIGHT TRAINS</a></li>
+        <li><a href="#">1939 ROSTER</a></li>
+        <li><a href="#">ROLLING STOCK</a></li>
+        <li><a href="#">MAINTENANCE EQUIPMENT</a></li>
+      </ul>
+    </li>
+    <li><a href="#">MERCHANDISE</a></li>
+    <li><a href="#">EVENTS</a>
+      <ul>
+        <li><a href="#">UPCOMING EVENTS</a></li>
+        <li><a href="#">PAST EVENTS</a></li>
+      </ul>
+    </li>
+    <li><a href="#">MEMBER LOGIN</a>
+      <ul>
+        <li><a href="#">BECOME A MEMBER</a></li>
+        <li><a href="#">NEWSLETTER</a></li>
+        <li><a href="#">INDEX</a></li>
+      </ul>
+    </li>
+  </ul>
+
+</div>
        
 </div><!--end of header-->
 </div><!--end of header container-->
