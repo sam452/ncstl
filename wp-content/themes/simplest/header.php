@@ -24,7 +24,8 @@
     <li><a href="#">HOME</a></li>
     <li><a href="#">ABOUT US</a>
       <ul>
-        <li><a href="#">CONTACT US</a></li>
+        <li><a href="http://www.ncstl.com/general/contact.htm">CONTACT US</a></li>
+        <li><a href="#">JOIN NCPS</a></li>
         <li><a href="#">PRIVACY POLICY</a></li>
         <li><a href="#">LINKS</a>
           <ul>
@@ -57,18 +58,20 @@
         <li><a href="#">MAINTENANCE EQUIPMENT</a></li>
       </ul>
     </li>
-    <li><a href="#">MERCHANDISE</a></li>
+    <li><a href="http://www.ncstl.com/merchandise/index.html">MERCHANDISE</a></li>
     <li><a href="#">EVENTS</a>
       <ul>
         <li><a href="#">UPCOMING EVENTS</a></li>
         <li><a href="#">PAST EVENTS</a></li>
       </ul>
     </li>
-    <li><a href="#">MEMBER LOGIN</a>
+    <li><a href="#">MEMBERS ONLY</a>
       <ul>
-        <li><a href="#">BECOME A MEMBER</a></li>
-        <li><a href="#">NEWSLETTER</a></li>
+        <li><a href="http://www.ncstl.com/membership/membership.htm">LOG IN</a></li>
         <li><a href="#">INDEX</a></li>
+        <li><a href="#">NEWLY ADDED</a></li>
+        <li><a href="#">NEWSLETTERS</a></li>
+        <LI><a href="#">EMPLOYEE DATABASE</a></li>
       </ul>
     </li>
   </ul>
