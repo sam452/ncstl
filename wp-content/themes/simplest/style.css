@@ -57,8 +57,7 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
 .hentry h2, .hentry h3, .hentry h4 {margin-top:2em;}
 
 .subcontent{
-  float: right;
-  width: 935px;
+  float: left;
 }
 
 .train{

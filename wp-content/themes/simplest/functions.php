@@ -48,7 +48,9 @@ function register_my_taxonomies() {
 			),
 		)
 	);
-}
+} // end of taxonomy test
+
+include 'meta-merch.php';
 
 //end of php call
 ?>
