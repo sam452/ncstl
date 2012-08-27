@@ -71,6 +71,15 @@ function merchandise_init() {
 }
 add_action( 'init', 'merchandise_init' );
 
+function add_merchandise_category_automatically($post_ID) {
+	global $wpdb;
+	if(!has_term('','category',$post_ID)){
+		$cat = array(23);
+		wp_set_object_terms($post_ID, $cat, 'category');
+	}
+}
+add_action('publish_merchandise', 'add_merchandise_category_automatically');
+
 // Equipment
 function equipment_init() {
   $labels = array(
