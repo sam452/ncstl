@@ -1,0 +1,35 @@
+/* 	Cascading Style Sheet for Jumpstart-it Online Forms
+	http://www.jumpstart-it.com										*/
+body{line-height:130%;}
+body,p,td,th,div,blockquote,dl,ul,ol,input{border-collapse:collapse;font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;}
+form td{border-bottom-style:solid;border-bottom-width:3px;border-left:none;border-right:none;border-right-width:3px;border-top:none;padding-top:7px;padding-bottom:5		px;}
+form td.bgcolor03{border-bottom:none;border-right:none;}
+form td.bgcolor07{border-right:none;}
+h1,h2{font-family:"Myriad Condensed Web","Franklin Gothic",sans-serif;padding-top:20px;}
+input.textbutton{background:transparent;border:0;cursor:pointer;padding:0;text-decoration:underline;}
+.comment,.header,.footer,.description,input{font-size:0.9em;}
+.explanation{font-size:0.9em;padding-top:5px;padding-bottom:5px;padding-left:5px;}
+.explanation_right{font-size:0.9em;margin-top:5px;margin-bottom:1px;} 
+.footer{padding:2px;}
+.tagline{font-size:0.7em;}
+.validatorwarning{background:#FF0000;color:#FFFFFF;display:block;font-weight:bold;}
+/* center form on page */
+body{text-align:center;/* for IE */}
+div.wrapper{margin:0 auto;/* for the rest */ text-align:left;/* reset text alignment */ width:80%;/* or a percentage,or whatever */}
+div.errorMessage td{border-style:solid;border-width:5px;border-color:RED;border-right:none;border-left:none;}
+
+form td{border-color:#C3D0DD;}
+.Color01{ Color: #1C64AB; }
+.Color02{ Color: #004385; }
+.Color03{ Color: #C3D0DD; }
+.Color04{ Color: #6293C3; }
+.Color05{ Color: #002D58; }
+.Color06{ Color: #FFFFFF; }
+.Color07{ Color: #FFFFFF; }
+.BgColor01{ background-color: #1C64AB; }
+.BgColor02{ background-color: #004385; }
+.BgColor03{ background-color: #C3D0DD; }
+.BgColor04{ background-color: #6293C3; }
+.BgColor05{ background-color: #002D58; }
+.BgColor06{ background-color: #FFFFFF; }
+.BgColor07{ background-color: #FFFFFF; }
