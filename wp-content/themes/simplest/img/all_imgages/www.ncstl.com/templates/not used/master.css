@@ -1,0 +1,34 @@
+h1 {
+	font: bold normal 20pt Verdana, Arial, Helvetica, sans-serif;
+	color: #FF0000;
+	left: 0px;
+	top: 0px;
+	text-transform: capitalize;
+
+}
+p {
+	font: 12pt Verdana, Arial, Helvetica, sans-serif;
+	color: #333333;
+}
+a:link {
+	font-weight: bold;
+	color: #000099;
+	text-decoration: none;
+
+}
+a:visited {
+	color: #0033FF;
+	text-decoration: none;
+}
+a:hover {
+	font-weight: bold;
+	color: #FF0000;
+	text-decoration: none;
+}
+a:active {
+	color: #999999;
+	text-decoration: none;
+}
+body {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
