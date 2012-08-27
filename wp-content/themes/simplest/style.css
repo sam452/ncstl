@@ -43,7 +43,6 @@ sub {top:0.5ex;}
 }
 
 body {
-  /*background-color: #006699;*/ 
   color:#111; 
   font-family: Helvetica, 
   Arial, sans-serif;    
@@ -102,7 +101,6 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
 }
 
 #content {
-  /*margin-top:4em;*/
   float:right;
   width: 829px;
 }
@@ -110,12 +108,6 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
 .hentry, .meta, #respond {
   margin-bottom:2em; 
   padding: 1em 2em; 
-  /*border-bottom:1px solid #ddd;*/
-}
-
-#topcontent{
-  /*width: 100%;
-  height: 400px;*/
 }
 
 #box1 #post1{
@@ -298,7 +290,7 @@ margin: auto;
 }
 
 .pPal {
-  bbackground-image: url('img/asfalt.png');
+  background-image: url('img/asfalt.png');
   color: white;
   width: 231px;
   height: 214px;
@@ -440,8 +432,6 @@ nav li:hover >.sub-menu li{
     float: left;
     height: 763px;
     padding-top: 3em;
-    border-right: solid;
-
 }
 
 .sidebar h4{
