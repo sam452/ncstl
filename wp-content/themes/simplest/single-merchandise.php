@@ -1,13 +1,12 @@
 <?php
 /**
- * The template for displaying merch pages.
+ * The template for displaying all pages.
  *
  */
  
 
-     get_header(); ?>
-This is the category-Merchandise template. 
-      	<?php if(function_exists('fontResizer_place')) { fontResizer_place(); } ?>
+      <?php get_header(); ?>
+This is the single-Merchandise template. 
 
 
       <div id="content">
@@ -23,15 +22,19 @@ This is the category-Merchandise template.
 <div class="post">
 <?php the_post_thumbnail(); ?>
 <div class="postInfo">
-<h3 class="lgr"><?php the_title(); ?></h3>
-<a href="<?php the_permalink(); ?>">Read More</a>
+<h3 class="lgr"><?php the_title() ?></h3>
+<a href="<?php the_permalink() ?>">Read More</a>
 </div>
 </div>
 <?php endwhile; ?>
 
 
 
+
       </div><!-- content -->
       
       <?php get_footer(); ?>
+  </body>
+</html>
 
+?>
