@@ -58,6 +58,7 @@ h1 a {text-decoration:none;}
 h1 a:hover {text-decoration:underline;}
 h1,h2,h3,h4,h5,h6 {clear:both;}
 
+<<<<<<< HEAD
 
 #wrapper{
   height: 100%;
@@ -104,11 +105,72 @@ h1,h2,h3,h4,h5,h6 {clear:both;}
   float:right;
   width: 829px;
 }
+=======
+#container {width: 88%; margin:2em auto; background-color: #ffffff; padding:4px 4px;}
+#header li {display:inline; margin:0 0.5em 0 0;} 
+#content {margin-top:4em;}
+>>>>>>> New header
+
+.header_h{
+  position: relative;
+  width: 92%;
+  margin-bottom: 15px;/*new on 8-27*/
+margin: 0 auto;
+}
+.left_h, .center, .eastwood, .bowtie, .omega/*hide h1 here*/ {
+    /*display: inline;*/
+    list-style: none;
+    margin: 0 auto;
+    margin-left: 5px;
+    margin-right: 5px;
+    /*position: relative;*/
+}/*new on 8-27*/
+.omega, ul {
+  /*float: right;*/
+  display: inline;
+  list-style: none;
+  /*margin-right: ;*/
+  position: vertical;
+  margin:0 auto;
+}/*new on 8-27*/
+.center{
+  float: left;
+  margin: 10px 27px;
+}
+.eastwood{
+float: right;
+margin: 0 auto;
+}
+
+.omega{
+float: top;
+margin: 0 auto;
+margin: 0px 0px 0px 350px;
+display: inline-block;
+list-style-type: none;
+}
+.bowtie{
+  float: left;
+  margin: 0 auto;
+}
+li {
+  display: inline;
+}
+
+
+
+
+
 
 .hentry, .meta, #respond {
   margin-bottom:2em; 
+<<<<<<< HEAD
   padding: 1em 2em; 
 }
+=======
+  padding-bottom:1em; 
+  border-bottom:1px solid #ddd; 
+>>>>>>> New header
 
 #box1 #post1{
 
@@ -321,12 +383,22 @@ margin: auto;
   padding: 1em;
 }
 
+<<<<<<< HEAD
 .typemin2{
   font-size: 18px;
   color: white;
   float: left;
   height: 77px;
   padding: 0px 20px 30px 21px;
+=======
+#nav {
+  height: 26px;
+  line-height: 16px;
+  padding: 20px 5px;
+  }
+#nav ul ul {
+  display: none;
+>>>>>>> New header
 }
 
 .copyright{
@@ -335,9 +407,58 @@ margin: auto;
   padding: 6px;
   font-size: 15px;
 }
+<<<<<<< HEAD
 
 .nav{
     background-image: url('img/asfalt.png');
+=======
+  #nav ul li:hover {
+    /*background: #4b545f;*/  /*testing without color*/
+    background: linear-gradient(top, #4b5964 0%, #5f6975 40%);
+    background: -moz-linear-gradient(top, #4f5964 0%, #5f6975 40%);
+    background: -webkit-linear-gradient(top, #4f5964 0%,#5f6975 40%);
+  }
+    /*#nav ul li:hover a {
+      color: #fff;
+    }*/        /*testing nav hover highlighton next line*/
+  
+#nav li:hover > a,
+#nav ul ul :hover > a {
+  background: #333;
+}
+
+#nav li a:hover,
+#nav li a:focus {
+  color: #9FF;
+}
+
+
+  #nav ul li a {
+    display: block; padding: 10px 21px;
+    color: #ffffff; text-decoration: none;
+  }
+  #nav ul ul {
+  background: #5f6975; border-radius: 1px; padding: 0;
+  position: absolute; top: 100%;
+}
+  #nav ul ul li {
+    float: none; 
+    border-top: 2px solid #6b727c;
+    /*border-bottom: 2px solid #575f6a;*/
+    border-bottom: 2px solid #e8e9eb
+    position: relative;
+  }
+    #nav ul ul li a {
+      padding: 7px 12px;
+      color: #fff;
+    }
+
+
+/* Old nav css is on the commented out lines. */
+/*.nav{
+    width:766px;
+    background: #000;
+>>>>>>> New header
     display:block;
     float:left;
     height: 54px;
