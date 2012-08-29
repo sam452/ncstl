@@ -8,7 +8,7 @@
     'after_widget' => '</div><!-- widget -->',
     'before_title' => '<h4>',
     'after_title' => '</h4>') );
-    add_custom_background();
+    //add_custom_background();
     add_theme_support('post-thumbnails');
     set_post_thumbnail_size(520, 250, true);
     add_action( 'init', 'register_my_menu' );
@@ -18,19 +18,8 @@
     
 include 'mycustoms.php';
 
-add_action( 'init', 'create_post_type' );
-function create_post_type() {
-  register_post_type( 'acme_product',
-    array(
-      'labels' => array(
-        'name' => __( 'Events' ),
-        'singular_name' => __( 'Event' )
-      ),
-    'public' => true,
-    'has_archive' => true,
-    )
-  );
-}
+
+
 remove_filter('get_the_excerpt', 'wp_trim_excerpt');
 add_filter('get_the_excerpt', 'custom_trim_excerpt');
 
@@ -65,8 +54,7 @@ function register_my_taxonomies() {
 			'labels' => array(
 				'name' => __( 'Equipment' ),
 				'singular_name' => __( 'Equipment' ),
-				'query_var' => true,
-				hierarchical => true
+				'query_var' => true
 			),
 		)
 	);
@@ -78,14 +66,14 @@ function register_my_taxonomies() {
 			'labels' => array(
 				'name' => __( 'History' ),
 				'singular_name' => __( 'History' ),
-				'query_var' => true,
-				hierarchical => true
+				'query_var' => true
 			),
 		)
 	);
 } // end of taxonomy test
 
 include 'meta-merch.php';
+include 'meta-events.php';
 
 /* Beginning of Allow Custom Post Type Archive*/
 add_filter('pre_get_posts', 'query_post_type');

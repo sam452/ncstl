@@ -5,7 +5,7 @@ Template Name:events
 ?>
 <?php get_header(); ?>
  
-   
+   This is the single-events template.
         
       <div class='subcontent'>  
       	

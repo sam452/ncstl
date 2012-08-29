@@ -58,54 +58,6 @@ h1 a {text-decoration:none;}
 h1 a:hover {text-decoration:underline;}
 h1,h2,h3,h4,h5,h6 {clear:both;}
 
-<<<<<<< HEAD
-
-#wrapper{
-  height: 100%;
-  padding-top: 25px;
-  opacity: .9;
-}
-
-#container {
-  width: 75%; 
-  margin: 0 auto 0 auto; 
-  background-image: url('img/extra_clean_paper.png');
-  border-top-left-radius: 44em 10.5em;
-  border-top-right-radius: 44em 10.5em;
-}
-
-#header{
-  height: 148px;
-  background-image: url('img/asfalt.png');
-  position: relative;
-  border-top-left-radius: 44em 9.5em;
-  border-top-right-radius: 44em 9.5em;
-  z-index: 10;
-}
-
-#header #description {margin-top:-1.5em;}
-#header li {display:inline; margin:0 0.5em 0 0;}
-
-#search{
-  float:right;
-  padding-top: 71px;
-  padding-right: 75px;
-  opacity: .7;
-}
-
-#s{
-  float:right;
-}
-
-#searchsubmit{
-
-}
-
-#content {
-  float:right;
-  width: 829px;
-}
-=======
 #container {width: 88%; margin:2em auto; background-color: #ffffff; padding:4px 4px;}
 #header li {display:inline; margin:0 0.5em 0 0;} 
 #content {margin-top:4em;}
@@ -162,15 +114,9 @@ li {
 
 
 
-.hentry, .meta, #respond {
-  margin-bottom:2em; 
-<<<<<<< HEAD
-  padding: 1em 2em; 
-}
-=======
   padding-bottom:1em; 
   border-bottom:1px solid #ddd; 
->>>>>>> New header
+
 
 #box1 #post1{
 
@@ -383,14 +329,14 @@ margin: auto;
   padding: 1em;
 }
 
-<<<<<<< HEAD
+
 .typemin2{
   font-size: 18px;
   color: white;
   float: left;
   height: 77px;
   padding: 0px 20px 30px 21px;
-=======
+
 #nav {
   height: 26px;
   line-height: 16px;
@@ -398,7 +344,6 @@ margin: auto;
   }
 #nav ul ul {
   display: none;
->>>>>>> New header
 }
 
 .copyright{
@@ -407,11 +352,9 @@ margin: auto;
   padding: 6px;
   font-size: 15px;
 }
-<<<<<<< HEAD
 
-.nav{
-    background-image: url('img/asfalt.png');
-=======
+
+
   #nav ul li:hover {
     /*background: #4b545f;*/  /*testing without color*/
     background: linear-gradient(top, #4b5964 0%, #5f6975 40%);
@@ -458,7 +401,7 @@ margin: auto;
 /*.nav{
     width:766px;
     background: #000;
->>>>>>> New header
+
     display:block;
     float:left;
     height: 54px;
@@ -476,6 +419,9 @@ margin: auto;
   text-decoration: underline;
 }
 
+.nav{
+    background-image: url('img/asfalt.png');
+    
 .nav ul{
     list-style:none;
 }

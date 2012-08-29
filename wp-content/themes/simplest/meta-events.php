@@ -19,7 +19,7 @@
  * Alt.: You also can make prefix empty to disable it
  */
 // Better has an underscore as last sign
-$prefix = 'merch_';
+$prefix = 'event_';
 
 global $meta_boxes;
 
@@ -27,45 +27,32 @@ $meta_boxes = array();
 
 // 2nd meta box
 $meta_boxes[] = array(
-	'id'    => 'merchandise',
-	'title' => 'Merchandise',
-	'pages' => array( 'post', 'merchandise', 'slider' ),
-	'class' => 'merchandise',
+	'id'    => 'events',
+	'title' => 'Events',
+	'pages' => array( 'post', 'events', 'slider' ),
+	'class' => 'events',
 
 	'fields' => array(
-		// price
+		// date
 		array(
-			'name' => 'Price here',
-			'desc' => 'Item price',
-			'id'   => "{$prefix}price",
-			'type' => 'text',
-			'std'  => 'xxx.xx',
+			'name' => 'Event date here',
+			'desc' => 'Event day',
+			'id'   => "{$prefix}date",
+			'type' => 'date',
+			'std'  => '12-12-1981',
+			'size' => '10',
+			'format'	=> 'mm-dd-yy'
 		),
-		// designs
+
+		// time
 		array(
-			'name' => 'Designs',
-			'desc' => 'Variations of the item',
-			'id'   => "{$prefix}design",
-			'type' => 'text',
-			'std'  => 'Style or color',
-		),
-		// sizes
-		array(
-			'name' => 'Sizes',
-			'id'   => "{$prefix}sizes",
-			'type' => 'select',
-			// Array of 'key' => 'value' pairs for select box
-			'options' => array(
-				's'		=> 'Small',
-				'm'		=> 'Medium',
-				'l'		=> 'Large',
-				'x'     => 'X-tra Large',
-			),
-			// Select multiple values, optional. Default is false.
-			'multiple' => true,
-			// Default value, can be string (single value) or array (for both single and multiple values)
-			'std'  => array( 'l' ),
-			'desc' => 'Select the sizes available.',
+			'name' => 'Event time here',
+			'desc' => 'Event start',
+			'id'   => "{$prefix}time",
+			'type' => 'time',
+			'std'  => '12:12:31',
+			'size' => '10',
+			'format'	=> 'hh:mm'
 		),
 	)
 );
@@ -79,7 +66,7 @@ $meta_boxes[] = array(
  *
  * @return void
  */
-function merch_register_meta_boxes()
+function events_register_meta_boxes()
 {
 	global $meta_boxes;
 
@@ -95,17 +82,17 @@ function merch_register_meta_boxes()
 // Hook to 'admin_init' to make sure the meta box class is loaded before
 // (in case using the meta box class in another plugin)
 // This is also helpful for some conditionals like checking page template, categories, etc.
-add_action( 'admin_init', 'merch_register_meta_boxes' );
+add_action( 'admin_init', 'events_register_meta_boxes' );
 
-function rw_maybe_include()
-{
+//function rw_maybe_include()
+//{
 	// Check for page template
-	$checked_templates = array( 'single-merchandise.php', 'sidebar-page.php' );
+//	$checked_templates = array( 'single-events.php', 'sidebar-page.php' );
 
-	$template = get_post_meta( $post_id, '_wp_page_template', true );
-	if ( in_array( $template, $checked_templates ) )
-		return true;
+//	$template = get_post_meta( $post_id, '_wp_page_template', true );
+//	if ( in_array( $template, $checked_templates ) )
+//		return true;
 
 	// If no condition matched
-	return false;
-}
+//	return false;
+//}
