@@ -83,7 +83,7 @@ function query_post_type($query) {
 	if($post_type)
 	    $post_type = $post_type;
 	else
-	    $post_type = array('post','merchandise','nav_menu_item');
+	    $post_type = array('post','merchandise', 'bob','equipment', 'nav_menu_item');
              // replace cpt with custom post type
     $query->set('post_type',$post_type);
 	return $query;

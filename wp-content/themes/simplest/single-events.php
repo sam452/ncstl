@@ -1,8 +1,3 @@
-<?php
-/*
-Template Name:events
-*/
-?>
 <?php get_header(); ?>
  
    This is the single-events template.
