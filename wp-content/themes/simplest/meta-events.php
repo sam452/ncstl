@@ -41,7 +41,7 @@ $meta_boxes[] = array(
 			'type' => 'date',
 			'std'  => '12-12-1981',
 			'size' => '10',
-			'format'	=> 'mm-dd-yy'
+			'format'	=> 'MM d, yy'
 		),
 
 		// time
@@ -52,7 +52,7 @@ $meta_boxes[] = array(
 			'type' => 'time',
 			'std'  => '12:12:31',
 			'size' => '10',
-			'format'	=> 'hh:mm'
+			'format'	=> 'h:mm tt'
 		),
 	)
 );

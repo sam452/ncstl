@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: WordPress Access Control 
+ * Plugin Name: WordPress Access Control
  * Plugin URI: http://brandonwamboldt.ca/plugins/members-only-menu-plugin/
  * Author: Brandon Wamboldt
  * Author URI: http://brandonwamboldt.ca/
- * Version: 3.1.2
+ * Version: 3.1.4
  * Description: This plugin is a powerful tool which gives you fine grained control over your pages and posts (and custom post types), allowing you to restrict a page, post, or custom post type to members, non-members, or even specific roles. You can customize how these pages and posts show up in search results, where users are directed when they visit them, and much more. <strong>You can even make your entire blog members only!</strong>.
  */
 
@@ -65,7 +65,7 @@ if ( class_exists( 'Walker_Nav_Menu' ) ) {
 				$indent = str_repeat( '    ', $depth );
 				$output .= "$indent</ul>\n";
 			}
-		}  
+		}
 
 		function start_el( & $output, $item, $depth, $args )
 		{
@@ -220,28 +220,28 @@ if ( class_exists( 'Walker_Page' ) ) {
 
 /**
  * The main plugin
- * 
+ *
  * @author Brandon Wamboldt
  * @package WordPress
  * @subpackage WordPressAccessControl
  */
-class WordPressAccessControl 
+class WordPressAccessControl
 {
 	function admin_init()
 	{
 		wp_enqueue_style( 'wpac-style', plugin_dir_url( __FILE__ ) . 'public/css/wpac.css' );
-		
+
 		// Load translation files
-		if ( ! load_plugin_textdomain( 'wpac', '/wp-content/languages/' ) ) {
-			load_plugin_textdomain( 'wpac', '/wp-content/plugins/wordpress-access-control/languages/', 'wordpress-access-control/languages/' );
+		if ( ! load_plugin_textdomain( 'wpac' ) ) {
+			load_plugin_textdomain( 'wpac', false, 'wordpress-access-control/languages/' );
 		}
 	}
-	
+
 	function admin_menu()
 	{
 		add_options_page( 'WordPress Access Control Settings', 'Members Only', 'manage_options', 'wpac-options', array( 'WordPressAccessControl', 'options_page' ) );
 	}
-	
+
 	function options_page()
 	{
 		// Save options?
@@ -249,134 +249,134 @@ class WordPressAccessControl
 			if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'wpac_options_save' ) ) {
 				$admin_error = __( 'Security check failed, please try again', 'wpac' );
 			} else {
-				
+
 				// Make the blog members only
 				if ( isset( $_REQUEST['wpac_members_only_blog'] ) && $_REQUEST['wpac_members_only_blog'] == 'yes' ) {
 					update_option( 'wpac_members_only_blog', true );
 				} else {
 					update_option( 'wpac_members_only_blog', false );
 				}
-				
+
 				// Members blog redirect link
 				if ( isset( $_REQUEST['wpac_members_blog_redirect'] ) ) {
 					update_option( 'wpac_members_blog_redirect', esc_url( $_REQUEST['wpac_members_blog_redirect'] ) );
 				} else {
 					delete_option( 'wpac_members_blog_redirect' );
 				}
-				
+
 				// Support custom post types
 				if ( isset( $_REQUEST['wpac_custom_post_types'] ) && is_array( $_REQUEST['wpac_custom_post_types'] ) ) {
 					update_option( 'wpac_custom_post_types', $_REQUEST['wpac_custom_post_types'] );
 				} else {
 					delete_option( 'wpac_custom_post_types' );
 				}
-				
+
 				// Override per-page permissions
 				if ( isset( $_REQUEST['wpac_always_accessible_by'] ) && is_array( $_REQUEST['wpac_always_accessible_by'] ) ) {
 					$wpac_always_accessible_by = array();
-					
+
 					foreach ( $_REQUEST['wpac_always_accessible_by'] as $role ) {
 						$wpac_always_accessible_by[] = $role;
 					}
-					
+
 					update_option( 'wpac_always_accessible_by', $wpac_always_accessible_by );
 				} else {
 					update_option( 'wpac_always_accessible_by', array() );
 				}
-				
+
 				// Show in the menu settings
 				if ( isset( $_REQUEST['wpac_show_in_menus'] ) && $_REQUEST['wpac_show_in_menus'] == 'always' ) {
 					update_option( 'wpac_show_in_menus', 'always' );
 				} else {
 					update_option( 'wpac_show_in_menus', 'with_access' );
 				}
-				
+
 				// Default post state setting
 				if ( isset( $_REQUEST['default_post_state'] ) && in_array( $_REQUEST['default_post_state'], array( 'public', 'members', 'nonmembers' ) ) ) {
 					update_option( 'wpac_default_post_state', $_REQUEST['default_post_state'] );
 				} else {
 					update_option( 'wpac_default_post_state', 'public' );
 				}
-				
+
 				// Default post roles
 				if ( isset( $_REQUEST['wpac_posts_default_restricted_to'] ) && is_array( $_REQUEST['wpac_posts_default_restricted_to'] ) ) {
 					update_option( 'wpac_posts_default_restricted_to', $_REQUEST['wpac_posts_default_restricted_to'] );
 				} else {
 					update_option( 'wpac_posts_default_restricted_to', array() );
 				}
-				
+
 				// Default page state setting
 				if ( isset( $_REQUEST['default_page_state'] ) && in_array( $_REQUEST['default_page_state'], array( 'public', 'members', 'nonmembers' ) ) ) {
 					update_option( 'wpac_default_page_state', $_REQUEST['default_page_state'] );
 				} else {
 					update_option( 'wpac_default_page_state', 'public' );
 				}
-				
+
 				// Default page roles
 				if ( isset( $_REQUEST['wpac_pages_default_restricted_to'] ) && is_array( $_REQUEST['wpac_pages_default_restricted_to'] ) ) {
 					update_option( 'wpac_pages_default_restricted_to', $_REQUEST['wpac_pages_default_restricted_to'] );
 				} else {
 					update_option( 'wpac_pages_default_restricted_to', array() );
 				}
-				
+
 				// Default redirect
 				if ( isset( $_REQUEST['wpac_default_members_redirect'] ) && ! empty( $_REQUEST['wpac_default_members_redirect'] ) ) {
 					update_option( 'wpac_default_members_redirect', $_REQUEST['wpac_default_members_redirect'] );
 				} else {
 					update_option( 'wpac_default_members_redirect', '' );
 				}
-				
+
 				// Search Options
 				if ( isset( $_REQUEST['show_posts_in_search'] ) && $_REQUEST['show_posts_in_search'] == 'yes' ) {
 					update_option( 'wpac_show_posts_in_search', true );
 				} else {
 					update_option( 'wpac_show_posts_in_search', false );
 				}
-				
+
 				if ( isset( $_REQUEST['show_post_excerpts_in_search'] ) && $_REQUEST['show_post_excerpts_in_search'] == 'yes' ) {
 					update_option( 'wpac_show_post_excerpts_in_search', true );
 				} else {
 					update_option( 'wpac_show_post_excerpts_in_search', false );
 				}
-				
+
 				if ( isset( $_REQUEST['show_pages_in_search'] ) && $_REQUEST['show_pages_in_search'] == 'yes' ) {
 					update_option( 'wpac_show_pages_in_search', true );
 				} else {
 					update_option( 'wpac_show_pages_in_search', false );
 				}
-				
+
 				if ( isset( $_REQUEST['show_page_excerpts_in_search'] ) && $_REQUEST['show_page_excerpts_in_search'] == 'yes' ) {
 					update_option( 'wpac_show_page_excerpts_in_search', true );
 				} else {
 					update_option( 'wpac_show_page_excerpts_in_search', false );
 				}
-				
+
 				// Custom excerpts
 				if ( isset( $_REQUEST['page_excerpt_text'] ) ) {
 					update_option( 'wpac_page_excerpt_text', $_REQUEST['page_excerpt_text'] );
 				}
-				
+
 				if ( isset( $_REQUEST['post_excerpt_text'] ) ) {
 					update_option( 'wpac_post_excerpt_text', $_REQUEST['post_excerpt_text'] );
 				}
-				
+
 				$admin_message = '<strong>' . __( 'Settings Saved.') . '</strong>';
 			}
 		}
-		
+
 		include( dirname( __FILE__ ) . '/templates/options.php' );
 	}
-	
-	function add_column( $columns ) 
+
+	function add_column( $columns )
 	{
 		$columns['wpac'] = '<img src="' . plugin_dir_url( __FILE__ ) . 'public/images/lock.png" alt="Access" />';
 		return $columns;
 	}
-	
-	function show_column( $name ) 
+
+	function show_column( $name )
 	{
 		global $post;
-		
+
 		switch ( $name ) {
 			case 'wpac':
 				if ( get_post_meta( $post->ID, '_wpac_is_members_only', true ) ) {
@@ -384,11 +384,11 @@ class WordPressAccessControl
 				} else if ( get_post_meta( $post->ID, '_wpac_is_nonmembers_only', true ) ) {
 					echo '<img src="' . plugin_dir_url( __FILE__ ) . 'public/images/unlock.png" alt="Non-members Only" title="Non-members Only" />';
 				}
-				
+
 				break;
 		}
 	}
-	
+
 	function check_conditions( $page_id )
 	{
 		global $wp_roles, $current_user;
@@ -433,23 +433,23 @@ class WordPressAccessControl
 	function check_for_members_only()
 	{
 		global $post;
-		
+
 		if ( is_admin() ) return;
-		
+
 		// Check for a members only blog
 		$blog_is_members_only = get_option( 'wpac_members_only_blog', false );
-		
+
 		if ( $blog_is_members_only && ! is_user_logged_in() ) {
 			$redirect_to = get_option( 'wpac_members_blog_redirect', wp_login_url( $_SERVER['REQUEST_URI'] ) );
 
 			if ( empty( $redirect_to ) ) {
 				$redirect_to = wp_login_url( $_SERVER['REQUEST_URI'] );
 			}
-			
+
 			header( 'Location: ' . add_query_arg( 'redirect_to', $_SERVER['REQUEST_URI'], $redirect_to ) );
 			exit();
 		}
-		
+
 		if ( get_post_meta( $post->ID, '_wpac_is_members_only', true ) && ! WordPressAccessControl::check_conditions( $post->ID ) ) {
 			if ( is_singular() ) {
 				$redirect_to = get_post_meta( $post->ID, '_wpac_members_redirect_to', true );
@@ -459,7 +459,7 @@ class WordPressAccessControl
 				} else {
 					header( 'Location: ' . add_query_arg( 'redirect_to', $_SERVER['REQUEST_URI'], $redirect_to ) );
 				}
-	
+
 				exit();
 			}
 		}
@@ -468,7 +468,7 @@ class WordPressAccessControl
 	function check_for_nonmembers_only()
 	{
 		if ( is_admin() ) return;
-		
+
 		global $post;
 
 		if ( get_post_meta( $post->ID, '_wpac_is_nonmembers_only', true ) && ! WordPressAccessControl::check_conditions( $post->ID ) ) {
@@ -483,51 +483,51 @@ class WordPressAccessControl
 			exit();
 		}
 	}
-	
+
 	function remove_excerpt( $excerpt )
 	{
 		if ( is_admin() || is_single() ) return $excerpt;
-		
+
 		global $post;
-		
+
 		if ( get_post_meta( $post->ID, '_wpac_is_members_only', true ) && ! WordPressAccessControl::check_conditions( $post->ID ) ) {
 			$show_excerpt = get_post_meta( $post->ID, '_wpac_show_excerpt_in_search', true );
-			
+
 			if ( ! is_singular() && $show_excerpt != 'yes' ) {
 				if ( $post->post_type == 'post' ) {
 					$excerpt = get_option( 'wpac_post_excerpt_text', __( 'To view the contents of this post, you must be authenticated and have the required access level.', 'wpac' ) );
 				} else {
 					$excerpt = get_option( 'wpac_page_excerpt_text', __( 'To view the contents of this page, you must be authenticated and have the required access level.', 'wpac' ) );
 				}
-				
+
 				return wpautop( $excerpt );
 			} else {
 				return $excerpt;
 			}
 		}
-		
+
 		return $excerpt;
 	}
 
-	function posts_join_paged( $join, $query ) 
+	function posts_join_paged( $join, $query )
 	{
 		global $wpdb;
-		
+
 		if ( is_admin() ) return $join;
-		
+
 		if ( ! is_singular() && ! is_admin() ) {
 			$join .= " LEFT JOIN {$wpdb->postmeta} PMWPAC3 ON PMWPAC3.post_id = {$wpdb->posts}.ID AND PMWPAC3.meta_key = '_wpac_show_in_search' LEFT JOIN {$wpdb->postmeta} PMWPAC ON PMWPAC.post_id = {$wpdb->posts}.ID AND PMWPAC.meta_key = '_wpac_is_members_only' LEFT JOIN {$wpdb->postmeta} PMWPAC2 ON PMWPAC2.post_id = {$wpdb->posts}.ID AND PMWPAC2.meta_key = '_wpac_is_nonmembers_only' ";
 		}
-		
+
 		return $join;
 	}
-	
-	function posts_where_paged( $where, $query ) 
+
+	function posts_where_paged( $where, $query )
 	{
 		global $wpdb;
-		
+
 		if ( is_admin() ) return $where;
-		
+
 		if ( ! is_singular() && ! is_admin() ) {
 			if ( ! is_user_logged_in() ) {
 				$where .= " AND ( PMWPAC.meta_value IS NULL OR PMWPAC3.meta_value = '1' OR PMWPAC.meta_value != 'true' ) ";
@@ -535,7 +535,7 @@ class WordPressAccessControl
 				$where .= " AND ( PMWPAC2.meta_value IS NULL OR PMWPAC2.meta_value != 'true' ) ";
 			}
 		}
-				
+
 		return $where;
 	}
 
@@ -543,7 +543,7 @@ class WordPressAccessControl
 	{
 		return $posts;
 		echo $query->request;exit();
-		
+
 		if ( ! is_singular() && ! is_admin() ) {
 			$new_posts = array();
 
@@ -553,24 +553,24 @@ class WordPressAccessControl
 					if ( get_post_meta( $post->ID, '_wpac_show_in_search', true ) != 1 ) {
 						continue;
 					}
-				} 
-				
+				}
+
 				// The page is non-members only and we do NOT have access to it
 				if ( get_post_meta( $post->ID, '_wpac_is_nonmembers_only', true ) && ! WordPressAccessControl::check_conditions( $post->ID ) ) {
 					if ( get_post_meta( $post->ID, '_wpac_show_in_search', true ) != 1 ) {
 						continue;
 					}
 				}
-				
+
 				// Remove results where the search term is in a [member] or [nonmember] tag and we don't have access
 				$st = get_search_query();
 				$content = do_shortcode( $post->post_content );
-				
-				
+
+
 				if ( ! empty( $st ) && is_search() && ! stristr( $content, $st ) ) {
 					continue;
 				}
-				
+
 				$new_posts[] = $post;
 			}
 
@@ -578,10 +578,10 @@ class WordPressAccessControl
 			$query->max_num_pages = ceil( count( $new_posts ) / $query->query_vars['posts_per_page'] );
 			$query->posts         = $new_posts;
 			$query->post_count    = count( $new_posts );
-			
+
 			return $new_posts;
 		}
-		
+
 		return $posts;
 	}
 
@@ -610,16 +610,16 @@ class WordPressAccessControl
 	function add_wpac_meta_box()
 	{
 		global $post;
-		
+
 		$is_members_only = get_post_meta( $post->ID, '_wpac_is_members_only', true );
 		$is_nonmembers_only = get_post_meta( $post->ID, '_wpac_is_nonmembers_only', true );
-		
+
 		if ( $post->post_type == 'post' ) {
 			$wpac_default_post_state = get_option( 'wpac_default_post_state', 'public' );
 		} else {
 			$wpac_default_post_state = get_option( 'wpac_default_page_state', 'public' );
 		}
-		
+
 		if ( $is_members_only == 'true' || ( $post->post_status == 'auto-draft' && $wpac_default_post_state == 'members' ) ) {
 			$is_members_only = 'checked="checked"';
 		}
@@ -627,7 +627,7 @@ class WordPressAccessControl
 		if ( $is_nonmembers_only == 'true' || ( $post->post_status == 'auto-draft' && $wpac_default_post_state == 'nonmembers' ) ) {
 			$is_nonmembers_only = 'checked="checked"';
 		}
-		
+
 		$wpac_show_in_search = get_post_meta( $post->ID, '_wpac_show_in_search', true );
 		$wpac_show_excerpt_in_search = get_post_meta( $post->ID, '_wpac_show_excerpt_in_search', true );
 		$pass_to_children = get_post_meta( $post->ID, '_wpac_pass_to_children', true );
@@ -656,7 +656,7 @@ class WordPressAccessControl
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return $post_id;
 		}
-		
+
 		if ( isset( $_POST['members_only'] ) && $_POST['members_only'] == 'true' ) {
 			update_post_meta( $post_id, '_wpac_is_members_only', 'true' );
 
@@ -697,10 +697,10 @@ class WordPressAccessControl
 
 		if ( isset( $_POST['pass_to_children'] ) && $_POST['pass_to_children'] == 'true' ) {
 			update_post_meta( $post_id, '_wpac_pass_to_children', 'true' );
-			
+
 			$original_id = $post_id;
 			$is_revision = wp_is_post_revision( $original_id );
-			
+
 			if ( $is_revision ) {
 				$original_id = $is_revision;
 			}
@@ -713,10 +713,10 @@ class WordPressAccessControl
 		} else {
 			delete_post_meta( $post_id, '_wpac_pass_to_children' );
 		}
-		
+
 		return $post_id;
 	}
-	
+
 	/**
 	 * Replaces the default WordPress nav menu walker with our own version
 	 *
@@ -752,11 +752,11 @@ class WordPressAccessControl
 
 		return $args;
 	}
-    
+
 	/**
 	 * This hooks in at a higher level to make sure functions like wp_list_pages
 	 * won't return members only pages.
-	 * 
+	 *
 	 * @param array $pages
 	 * @return array
 	 *
@@ -769,7 +769,7 @@ class WordPressAccessControl
 		if ( is_admin() ) {
 			return $pages;
 		}
-		
+
 		// Whether or not the user is logged in
 		$auth = is_user_logged_in();
 
@@ -789,7 +789,7 @@ class WordPressAccessControl
 
 		return $pages;
 	}
-	
+
 	/**
 	 * Adds links to the plugin row to view the options page or view the plugin
 	 * documentation.
@@ -806,17 +806,17 @@ class WordPressAccessControl
 	 * @since WordPress Access Control 3.0
 	 * @author Brandon Wamboldt <brandon.wamboldt@gmail.com>
 	 */
-	function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status ) 
+	function plugin_row_meta( $plugin_meta, $plugin_file, $plugin_data, $status )
 	{
 		if ( $plugin_file == str_replace( '.php', '/', basename( __FILE__ ) ) . basename( __FILE__ ) ) {
 			$plugin_meta[] = '<a href="options-general.php?page=wpac-options">' . __( 'Visit options page', 'wpac' ) . '</a>';
 			$plugin_meta[] = '<a href="' . plugin_dir_url( __FILE__ ) . 'documentation/index.html">' . __( 'Plugin Documentation', 'wpac' ) . '</a>';
 		}
-		
+
 		return $plugin_meta;
 	}
-		
-		
+
+
 	/**
 	 * Hides content for users that are not logged in and displays content for
 	 * users who are logged in. Calls do_shortcode on the content to allow
@@ -829,17 +829,50 @@ class WordPressAccessControl
 	 * @since WordPress Access Control 3.0
 	 * @author Brandon Wamboldt <brandon.wamboldt@gmail.com>
 	 */
-	function shortcode_members( $attributes, $content = NULL ) 
+	function shortcode_members( $attributes, $content = NULL )
 	{
-		global $post;
-		
+		global $current_user, $post;
+
 		if ( is_user_logged_in() ) {
+            if (isset($attributes['role'])) {
+
+                // Determine the syntax (Singular role, OR syntax or NOT syntax)
+                if (substr($attributes['role'], 0, 3) == 'or:') {
+                    $roles = explode(',', substr($attributes['role'], 3));
+
+                    $has_a_role = false;
+
+                    foreach ($roles as $role) {
+                        if (in_array($role, $current_user->roles)) {
+                            $has_a_role = true;
+                            break;
+                        }
+                    }
+
+                    if (!$has_a_role) {
+                        return '';
+                    }
+                } else if (substr($attributes['role'], 0, 4) == 'not:') {
+                    $roles = explode(',', substr($attributes['role'], 4));
+
+                    foreach ($roles as $role) {
+                        if (in_array($role, $current_user->roles)) {
+                            return '';
+                        }
+                    }
+                } else {
+                    if (!in_array($attributes['role'], $current_user->roles)) {
+                        return '';
+                    }
+                }
+            }
+
 			return wpautop( do_shortcode( $content ) );
 		}
-		
+
 		return '';
 	}
-		
+
 	/**
 	 * Hides content for users that are logged in and displays content for users
 	 * who are not logged in. Calls do_shortcode on the content to allow nested
@@ -852,17 +885,17 @@ class WordPressAccessControl
 	 * @since WordPress Access Control 3.0
 	 * @author Brandon Wamboldt <brandon.wamboldt@gmail.com>
 	 */
-	function shortcode_nonmembers( $attributes, $content = NULL ) 
+	function shortcode_nonmembers( $attributes, $content = NULL )
 	{
 		global $post;
-		
+
 		if ( ! is_user_logged_in() ) {
 			return wpautop( do_shortcode( $content ) );
 		}
-		
+
 		return '';
 	}
-	
+
 	/*
 	 * Loads a file that will override certain WordPress default widgets with
 	 * a slightly modified version that allows admins to select it's visibility
@@ -875,7 +908,7 @@ class WordPressAccessControl
 	{
 		require( dirname( __FILE__ ) . '/default-widgets.php' );
 	}
-	
+
 	/**
 	 * Adds our member only menus for each regular menu
 	 *
@@ -885,14 +918,14 @@ class WordPressAccessControl
 	function add_wpac_nav_menus()
 	{
 		global $_wp_registered_nav_menus;
-		
+
 		$original = (array) $_wp_registered_nav_menus;
-		
+
 		foreach ( $original as $location => $label ) {
 			$_wp_registered_nav_menus[$location . '_wpac'] = $label . ' - Members Only';
 		}
 	}
-	
+
 	/**
 	 * Checks to see if a members only version of the current menu is available
 	 * and will load that instead of the normal menu.
@@ -912,25 +945,25 @@ class WordPressAccessControl
 	{
 		// Don't do anything if the user isn't logged in
 		if ( is_user_logged_in() ) {
-			
+
 			// See if the theme even passed a proper menu ID
 			if ( ! empty( $args['theme_location'] ) ) {
-				
-				// Member only menus end in _wpac 
+
+				// Member only menus end in _wpac
 				$theme_location = $args['theme_location'] . '_wpac';
-				
+
 				// Get the nav menu based on the theme_location
 				if ( ( $locations = get_nav_menu_locations() ) && isset( $locations[ $theme_location ] ) ) {
 					$menu = wp_get_nav_menu_object( $locations[ $theme_location ] );
-					
+
 					// Only use the member only menu if it's not empty
-					if ( $menu->count > 0 ) {
+					if ( $menu && $menu->count > 0 ) {
 						$args['theme_location'] = $theme_location;
 					}
 				}
 			}
 		}
-		
+
 		return $args;
 	}
 }

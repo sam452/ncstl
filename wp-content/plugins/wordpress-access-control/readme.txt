@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: members, only, plugin, restricted, access, menus, 3.3, wp_nav_menu, nonmembers
 Requires at least: 2.9
 Tested up to: 3.3
-Stable tag: 3.1.2
+Stable tag: 3.1.4
 
 Restrict pages, posts, custom post types, menus and widgets to members, nonmembers or specific roles and still add to navigation
 
@@ -12,7 +12,7 @@ Restrict pages, posts, custom post types, menus and widgets to members, nonmembe
 
 **Now with shortcodes and post/custom-post-type support, as well as a comprehensive admin interface for setting plugin defaults**
 
-WordPress Access Control is a plugin designed to integrate into membership sites where certain pages, posts and custom post types should only be available to members of the site. The plugin offers fine tuned features for this purpose, including the ability to set site wide defaults and override these on a per-page basis. 
+WordPress Access Control is a plugin designed to integrate into membership sites where certain pages, posts and custom post types should only be available to members of the site. The plugin offers fine tuned features for this purpose, including the ability to set site wide defaults and override these on a per-page basis.
 
 You can easily set a page to be accessible only by members of your site, or even a specific role. You can also set pages to be accessible only to non-members of  your site, useful for registration pages.
 
@@ -48,6 +48,9 @@ Please make sure you have the meta enabled under the Screen Options panel (top r
 **This plugin doesn't work with theme XYZ**
 Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-plugin/ and I will address it A.S.A.P.
 
+**Can I restrict content to a specific role using shortcodes?**
+Yes, this is a new feature in 3.1.3. Use the syntax [members role="administrator"]Your content[/members] where administrator is the desired role
+
 == Screenshots ==
 
 1. The meta box added by this plugin
@@ -56,6 +59,16 @@ Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-pl
 4. The widget options for making widgets visible only to members/non-members
 
 == Changelog ==
+
+= 3.1.4 - August 30, 2012 =
+
+* Added not/or keywords to the role option of the members shortcode, syntax: [members role="not:guest,banned"][/members] and [members role="or:editor,author,contributor"] (Thanks to Dave Amphlett for the idea)
+
+= 3.1.3 - August 30, 2012 =
+
+* Fixed a PHP warning about load_plugin_textdomain using a deprecated argument
+* Fixed a PHP error if no nav menu is set
+* Added a role option to the members shortcode (Use like [members role="administrator"][/members])
 
 = 3.1.2 - December 7, 2011 =
 
@@ -72,7 +85,7 @@ Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-pl
 * Admins now have the ability to override permissions to prevent lower level users from denying admins access to posts
 * Admins may now create menu widgets that are only visible to members or non-members from the Widgets screen
 * Admins may now create WordPress nav menus that are only visible to members
-* Updated the documentation 
+* Updated the documentation
 * Added new screenshots
 
 = 3.0.5 - June 6, 2011 =
@@ -126,7 +139,7 @@ Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-pl
 = 1.6.3 =
 * Fixed a problem in pre WordPress 3 instances where a PHP error is generated due to lack of the Walker_Nav_Menu class
 
-= 1.6.2 = 
+= 1.6.2 =
 * Fixed (X)HTML validation errors caused by an empty ul which could occur if all items in a submenu were members only but the parent element was not.
 
 = 1.6 =
@@ -135,7 +148,7 @@ Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-pl
 = 1.5 =
 * Fixed an error where submenus would still be generated if the parent was marked as members only. This has been fixed.
 
-= 1.4 = 
+= 1.4 =
 * Added support for PHP4
 
 = 1.3 =
@@ -167,10 +180,10 @@ Please leave a comment at http://brandonwamboldt.ca/plugins/members-only-menu-pl
 * Admins now have the ability to override permissions to prevent lower level users from denying admins access to posts
 * Admins may now create menu widgets that are only visible to members or non-members from the Widgets screen
 * Admins may now create WordPress nav menus that are only visible to members
-* Updated the documentation 
+* Updated the documentation
 * Added new screenshots
 
-= 1.6.4 = 
+= 1.6.4 =
 * Fixed several bugs including adding support for wp_list_pages
 
 = 1.6 =
