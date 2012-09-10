@@ -1,34 +1,28 @@
-<?php
-/*
-Template Name:about
-*/
-?>
+
 <?php get_header(); ?>
 
    
-        
+     
       <div class='subcontent'>  
+        <div id="innerbody">
         <?php if(function_exists('fontResizer_place')) { fontResizer_place(); } ?>
           <?php if(have_posts()) : while(have_posts()) : the_post(); ?>
           <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-            <?php the_title('<h2 class="entry-title"><a href="' . get_permalink() . '" title="' . the_title_attribute('echo=0') . '" rel="bookmark">', '</a></h2>'); ?>
-            <div class="entry-content">
-            <?php the_content(__('Continue reading', 'example')); ?>
-            <?php wp_link_pages('before=<p class="pages">' . __('Pages:','example') . '&after=</p>'); ?>
-          </div>
+            <?php the_title('<h3 class="entry-title"><a href="' . get_permalink() . '" title="' . the_title_attribute('echo=0') . '" rel="bookmark">', '</a></h3>'); ?>
+            
+              
+              <?php the_content(); ?>
+            
+           
           </div>
             <?php endwhile; ?>
           <?php else : ?>
             <p class="no-posts"><?php _e('Sorry, no posts matched your criteria', 'example'); ?></p>
           <?php endif; ?>
+
+
+
+        </div><!--#innerbody-->
       </div>  <!--end subcontent-->
-
-
-
-
-
-
-
-
 <?php get_sidebar();?>
 <?php get_footer(); ?>

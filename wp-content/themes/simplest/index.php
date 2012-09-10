@@ -3,43 +3,28 @@
   <div id="content">
     
     <div class='subcontent'> 
+       <div id="innerbody">
+        <?php if(function_exists('fontResizer_place')) { fontResizer_place(); } ?>
+        <?php if(have_posts()) : while(have_posts()) : the_post(); ?>
+          <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+            <?php the_title('<h3 class="entry-title"><a href="' . get_permalink() . '" title="' . the_title_attribute('echo=0') . '" rel="bookmark">', '</a></h3>'); ?>
 
-      <?php if(function_exists('fontResizer_place')) { fontResizer_place(); } ?>
-
-          <div id='post1'>  
-
-            <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-            <div <?php post_class(); ?>>
-              <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
-              <?php the_content(); ?>
-              <?php if ( !is_singular() && get_the_title() == '' ) : ?>
-                <a href="<?php the_permalink(); ?>">(more...)</a>
-              <?php endif; ?>
-              <?php if ( is_singular() ) : ?>
-                <div class="pagination"><?php wp_link_pages(); ?></div>
-              <?php endif; ?>
-              <div class="clear"> </div>
-            </div><!-- post_class() -->
-
-            <?php if ( is_singular() ) : ?>
-              <div class="meta">
-                <p>Posted by <?php the_author_posts_link(); ?>
-                on <a href="<?php the_permalink(); ?>"><?php the_date(); ?></a>
-                in <?php the_category( ', ' ); ?><?php the_tags( ', ' ); ?></p>
-              </div><!-- meta -->
-              <?php comments_template(); ?>
-            <?php endif; ?>
-          <?php endwhile; else: ?>
-            <div class="hentry"><h2>Sorry, the page you requested cannot be found</h2></div>
+          <?php the_content(); ?>
+              
+          </div>
+            <?php endwhile; ?>
+          <?php else : ?>
+            <p class="no-posts"><?php _e('Sorry, no posts matched your criteria', 'example'); ?></p>
           <?php endif; ?>
 
-         </div> <!--end post1-->
-
+  </div><!--end innerbody-->
   </div>  <!--end subcontent-->
-
-  
   </div><!--end content -->
   
 <?php get_sidebar(); ?>
 <?php get_footer(); ?>
+
+
+
   
+
