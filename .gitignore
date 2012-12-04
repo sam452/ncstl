@@ -19,3 +19,6 @@ license.txt
 .DS_Store
 
 wp-content/themes/train/page.php
+wp-content/themes/simplest/img/all_imgages 
+wp-content/theme/simplest/*.xml
+iwp-content/themes/simplest/*.sql
