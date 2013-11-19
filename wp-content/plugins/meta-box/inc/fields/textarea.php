@@ -17,16 +17,31 @@ if ( ! class_exists( 'RWMB_Textarea_Field' ) )
 		 */
 		static function html( $html, $meta, $field )
 		{
-			$std		 = isset( $field['disabled'] ) ? $field['disabled'] : false;
-			$disabled	 = disabled( $std, true, false );
+			return sprintf(
+				'<textarea class="rwmb-textarea large-text" name="%s" id="%s" cols="%s" rows="%s" placeholder="%s">%s</textarea>',
+				$field['field_name'],
+				$field['id'],
+				$field['cols'],
+				$field['rows'],
+				$field['placeholder'],
+				$meta
+			);
+		}
 
-			$cols	 = isset( $field['cols'] ) ? $field['cols'] : "60";
-			$rows	 = isset( $field['rows'] ) ? $field['rows'] : "10";
-			$name	 = "name='{$field['field_name']}'";
-			$id		 = " id='{$field['id']}'";
-			$html	.= "<textarea class='rwmb-textarea large-text'{$name}{$id} cols='{$cols}' rows='{$rows}'{$disabled}>{$meta}</textarea>";
-
-			return $html;
+		/**
+		 * Normalize parameters for field
+		 *
+		 * @param array $field
+		 *
+		 * @return array
+		 */
+		static function normalize_field( $field )
+		{
+			$field = wp_parse_args( $field, array(
+				'cols' => 60,
+				'rows' => 3,
+			) );
+			return $field;
 		}
 	}
 }

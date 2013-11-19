@@ -1,34 +1,54 @@
 === Meta Box ===
-Contributors: rilwis, franz-josef-kaiser, Omnicia, erodesign, funkedgeek, PerWiklander, ruanmer
+Contributors: rilwis, franz-josef-kaiser, Omnicia, funkedgeek, PerWiklander, ruanmer
 Donate link: http://www.deluxeblogtips.com/donate
 Tags: meta-box, custom-fields, custom-field, meta, meta-boxes
-Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: trunk
+Requires at least: 3.5
+Tested up to: 3.6.1
+Stable tag: 4.3.6
 
 Meta Box plugin helps you easily implement multiple meta boxes in editing pages in WordPress. Works with custom post types and various field types.
 
 == Description ==
 
-Meta Box Script for WordPress is a WordPress plugin that provides an API for you to easily implement multiple meta boxes in editing pages in WordPress. It works with custom post types and supports various field types.
+Meta Box plugin provides an API to easily implement custom meta boxes in editing pages (add new/edit post) in WordPress. It works with custom post types and supports various field types.
 
-* Create meta box for editing pages in WordPress.
-* Compatible with custom post types since WordPress 3.0.
-* Support input types: text, textarea, checkbox, checkbox list, radio box, select, wysiwyg, old & new file upload, date, time, color
+**Features**
 
-[Project Page](http://www.deluxeblogtips.com/meta-box) | [GitHub](https://github.com/rilwis/meta-box) | [Documentation](http://www.deluxeblogtips.com/docs) | [Support](http://www.deluxeblogtips.com/support) | [Donate](http://www.deluxeblogtips.com/donate)
+* Easily registers multiple custom meta boxes for posts, pages or custom post types
+* Has built-in hooks which allow you to change the appearance and behavior of meta boxes
+* Easily integrated with themes
+
+**Supported fields**
+
+- button
+- checkbox, checkbox_list
+- color
+- date, time, datetime
+- divider
+- file, file_advanced
+- heading
+- hidden
+- image, thickbox_image, plupload_image, image_advanced
+- map
+- password
+- post
+- radio
+- select, select_advanced (uses [select2](http://ivaynberg.github.com/select2/))
+- slider, range
+- taxonomy
+- text, url, email, number, oembed
+- textarea
+- wysiwyg
+
+[Project Page](http://www.deluxeblogtips.com/meta-box/) | [Getting Started](http://www.deluxeblogtips.com/meta-box/getting-started/) | [Support Forums](http://www.deluxeblogtips.com/forums/) | [Donate](http://www.deluxeblogtips.com/donate/)
 
 == Installation ==
 
 1. Unzip the download package
 1. Upload `meta-box` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Copy `demo/demo.php` file from plugin directory to your theme folder
-1. Open `functions.php` file of your theme and add the following code:
 
-    include 'demo.php';
-
-To change meta box definition, please see comments in `demo.php`.
+To getting started with the plugin API, please read [this tutorial](http://www.deluxeblogtips.com/meta-box/getting-started/).
 
 == Frequently Asked Questions ==
 
@@ -37,6 +57,119 @@ To change meta box definition, please see comments in `demo.php`.
 2. Advanced fields
 
 == Changelog ==
+
+= 4.3.6 =
+* Bug fix: fatal error in PHP 5.2 (continue)
+* Improvement: allow register meta boxes via filter
+
+= 4.3.5 =
+* Bug fix: fatal error in PHP 5.2
+* Bug fix: save empty values of clonable fields
+
+= 4.3.4 =
+* Bug fix: not show upload button after delete image when reach max_file_upload. #347
+* Bug fix: autocomplete for map which conflicts with tags (terms) autocomplete
+* Bug fix: random image order when reorder
+* Bug fix: undefined index, notices in WordPress 3.6, notice error for oembed field
+* Improvement: add default location for map field (via `std` param as usual)
+* Improvement: add `placeholder` for text fields (url, email, etc.)
+* Improvement: add `multiple` param for helper function to get value of multiple fields
+* Improvement: `width` & `height` for map in helper function now requires units (allow to set %)
+* Drop support for WordPress 3.3 (wysiwyg) and < 3.5 (for file & image field which uses new json functions)
+
+= 4.3.3 =
+* Bug fix: cannot clear all terms in taxonomy field
+* Bug fix: potential problem with autosave
+* Bug fix: cannot save zero string value "0"
+* Improvement: add Turkish language
+* Improvement: add taxonomy_advanced field, which saves term IDs as comma separated value in custom field
+
+= 4.3.2 =
+* Bug fix: allow to have more than 1 map on a page
+* Bug fix: use HTTPS for Google Maps to work both in HTTP & HTTPS
+* Bug fix: allow to clear all terms in taxonomy field
+* Bug fix: "std" value for select fields is no longer "placeholder"
+* Improvement: add "placeholder" param for select fields
+* Improvement: add to helper function ability to show Google Maps in the front end. Check documentation for usage.
+* Improvement: add spaces between radio inputs
+* Improvement: add more params to "rwmb_meta" filter
+* Improvement: using CSS animation for delete image
+
+= 4.3.1 =
+* Bug fix: fatal error if ASP open tag is allowed in php.ini
+
+= 4.3 =
+* Bug fix: show full size image after upload if thumbnail is not available
+* Bug fix: new added file not shown
+* Bug fix: issue with color field disappearing
+* Bug fix: `max_file_upload` now works for normal `file` & `image` as well
+* Bug fix: problem with uploading with the advanced fields
+* Bug fix: file & image advanced not saving
+* Bug fix: `select_advanced` cloning issue
+* Bug fix: `plupload_image` ordering
+* Improvement: add `divider`, `heading`, `button`, `range`, `oembed`, `email`, `post` fields
+* Improvement: translation for file & image fields
+* Improvement: add option `default_hidden` to hide meta box by default
+* Improvement: allow to have multiple maps on the same page
+* Improvement: file and image advanced now use Underscore.js
+* Improvement: `slider` filed now has `prefix` and `suffix` for text labels and `js_options` for more JS options
+* Improvement: WYSIWYS can bypass the `wpautop` using `raw` parameter
+* Improvement: `color` field now supports new color picker in WP 3.5
+* Improvement: add `ID` to results returned by `rwmb_meta` when getting meta value of file & image
+* Improvement: auto use localized version for date & time fields
+* Improvement: add `timestamp` option to save the datetime as unix timestamp internally
+* Improvement: add `autosave` option for meta box
+* Improvement: add `force_delete` option for file and image field
+* And lots of changes and improvements
+
+
+= 4.2.4 =
+* Bug fix: path to Select2 JS and CSS. [Link](http://wordpress.org/support/topic/missing-files-5)
+* Bug fix: `taxonomy.js` loading
+* Bug fix: saving in quick mode edit
+* Improvement: add `before` and `after` attributes to fields that can be used to display custom text
+* Improvement: add Arabic and Spanish languages
+* Improvement: add `rwmb*_before_save_post` and `rwmb*_before_save_post` actions before and after save post
+* Improvement: add autocomplete for geo location in `map` field, add fancy animation to drop marker
+* Improvemnet: add `url` field
+
+
+= 4.2.3 =
+* Bug fix: clone date field. [Link](http://www.deluxeblogtips.com/forums/viewtopic.php?id=299)
+
+= 4.2.2 =
+* Bug fix: `time` field doesn't work. [Link](http://wordpress.org/support/topic/time-field-js-wont-run-without-datetime)
+* Bug fix: wrong JS call for `datetime`. [Link](http://wordpress.org/support/topic/421-datetime)
+* Improvement: file and images now not deleted from library, *unless* use `force_delete` option
+* Improvement: add `select_advanced` field, which uses [select2](http://ivaynberg.github.com/select2/) for better UX. Thanks @funkedgeek
+
+= 4.2.1 =
+* Bug fix: not save wysiwyg field in full screen mode. [Link](http://www.deluxeblogtips.com/forums/viewtopic.php?id=161)
+* Bug fix: default value for select/checkbox_list. [Link](http://www.deluxeblogtips.com/forums/viewtopic.php?id=174)
+* Bug fix: duplicated append test to `date` picker
+* Bug fix: incorrect enqueue styles, issue #166
+* Improvement: initial new field type `map`
+
+= 4.2 =
+* Bug fix: save only last element of `select` field with `multiple` values. [Link](http://wordpress.org/support/topic/plugin-meta-box-multiple-declaration-for-select-fields-no-longer-working?replies=5#post-3254534)
+* Improvement: add `js_options` attribute for `date`, `datetime`, `time` fields to adjust jQuery date/datetime picker options. See `demo/demo.php` for usage
+* Improvement: add `options` attribute for `wysiwyg`. You now can pass arguments same as for `wp_editor` function
+* Improvement: clone feature now works with `checkbox_list` and `select` with `multiple` values
+* Improvement: add `rwmb-{$field_type}-wrapper` class to field markup
+* Improvement: Add [rwmb_meta meta_key="..."] shortcode. Attributes are the same as `rwmb_meta` function.
+* Code refactored
+
+= 4.1.11 =
+* Bug fix: helper function for getting `taxonomy` field type
+* Bug fix: `multiple` attribute for `select` field type
+
+= 4.1.10 =
+* Allow helper functions can be used in admin area
+* Allow cloned fields to have a uniquely indexed `name` attribute
+* Add Swedish translation
+* Allow hidden field has its own value
+* Taxonomy field now supported by `rwmb_meta` function
+* Improvement in code format and field normalizing
 
 = 4.1.9 =
 * Add helper function to retrieve meta values

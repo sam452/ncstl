@@ -33,24 +33,32 @@ if(!class_exists('M_Member_Search')) {
 		function do_paging() {
 			if ( $this->total_users_for_query > $this->users_per_page ) { // have to page the results
 				$args = array();
-				if( ! empty($this->search_term) )
-					$args['usersearch'] = urlencode($this->search_term);
-				if( ! empty($this->role) )
+				if( ! empty($this->search_term) ) {
+					$args['s'] = urlencode($this->search_term);
+				}
+
+				if( ! empty($this->role) ) {
 					$args['role'] = urlencode($this->role);
-				if( ! empty($this->sub_id) )
-					$args['sub_id'] = urlencode($this->sub_id);
-				if( ! empty($this->level_id) )
-					$args['level_id'] = urlencode($this->level_id);
+				}
+				if( ! empty($this->sub_id) ) {
+					$args['sub_op'] = urlencode($this->sub_id);
+					$args['doactionsub'] = 'Filter';
+				}
+				if( ! empty($this->level_id) ) {
+					$args['level_op'] = urlencode($this->level_id);
+					$args['doactionlevel'] = 'Filter';
+				}
+
 
 				$this->paging_text = paginate_links( array(
 					'total' => ceil($this->total_users_for_query / $this->users_per_page),
 					'current' => $this->page,
-					'base' => 'admin.php?page=members&%_%',
+					'base' => 'admin.php?page=membershipmembers&%_%',
 					'format' => 'userspage=%#%',
 					'add_args' => $args
 				) );
 				if ( $this->paging_text ) {
-					$this->paging_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>%s',
+					$this->paging_text = sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s','membership' ) . '</span>%s',
 						number_format_i18n( ( $this->page - 1 ) * $this->users_per_page + 1 ),
 						number_format_i18n( min( $this->page * $this->users_per_page, $this->total_users_for_query ) ),
 						number_format_i18n( $this->total_users_for_query ),

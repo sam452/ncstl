@@ -153,7 +153,7 @@ if(!class_exists('M_Membership')) {
 			if($relationships) {
 				foreach($relationships as $key => $rel) {
 					// Add 6 hours to the expiry date to give a grace period?
-					if( strtotime("+ 6 hours", mysql2date("U", $rel->expirydate)) <= time() ) {
+					if( strtotime(apply_filters('membership_gateway_exp_window',"+ 6 hours"), mysql2date("U", $rel->expirydate)) <= time() ) {
 						// expired, we need to remove the subscription
 						if($this->is_marked_for_expire($rel->sub_id)) {
 							$this->expire_subscription($rel->sub_id);
@@ -162,7 +162,7 @@ if(!class_exists('M_Membership')) {
 						}
 
 						// Need to check if we are on a solo payment and have a valid payment or the next level is free.
-						$onsolo = get_user_meta( $user_id, 'membership_signup_gateway_is_single', true );
+						$onsolo = get_user_meta( $this->ID, 'membership_signup_gateway_is_single', true );
 						if(!empty($onsolo) && $onsolo == 'yes') {
 							// We are on a solo gateway so need some extra checks
 							// Grab the subscription
@@ -253,6 +253,8 @@ if(!class_exists('M_Membership')) {
 
 		function create_subscription($sub_id, $gateway = 'admin') {
 
+			global $blog_id;
+
 			if(!$this->active_member()) {
 				$this->toggle_activation();
 			}
@@ -264,8 +266,42 @@ if(!class_exists('M_Membership')) {
 
 				foreach($levels as $key => $level) {
 					if($level->level_order == 1) {
-
 						$this->add_subscription($sub_id, $level->level_id, $level->level_order, $gateway);
+
+						// Check if a coupon transient already exists
+						if(defined('MEMBERSHIP_GLOBAL_TABLES') && MEMBERSHIP_GLOBAL_TABLES === true) {
+							if(function_exists('get_site_transient')) {
+								$trying = get_site_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+							} else {
+								$trying = get_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+							}
+						} else {
+							$trying = get_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+						}
+
+						// If there is a coupon transient do our coupon count magic
+						if( $trying != false && is_array($trying) ) {
+
+							if( !empty( $trying['coupon_id'] ) ) {
+								$coupon = new M_Coupon( $trying['coupon_id'] );
+								// Add one to the coupon count
+								$coupon->increment_coupon_used();
+								// Store the coupon details in the usermeta
+								update_user_meta( $this->ID, 'm_coupon_' . $sub_id, $trying );
+							}
+
+							if(defined('MEMBERSHIP_GLOBAL_TABLES') && MEMBERSHIP_GLOBAL_TABLES === true) {
+								if(function_exists('delete_site_transient')) {
+									delete_site_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+								} else {
+									delete_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+								}
+							} else {
+								delete_transient( 'm_coupon_' . $blog_id . '_' . $this->ID . '_' . $sub_id );
+							}
+
+						}
+
 						break;
 					}
 				}
@@ -410,7 +446,7 @@ if(!class_exists('M_Membership')) {
 			$sql = $this->db->prepare( "SELECT rel_id FROM {$this->membership_relationships} WHERE user_id = %d AND level_id = %d", $this->ID, $level_id );
 
 			if(!$include_subs) {
-				$sql .= $this->db->prepare( " AND sub_id = 0" );
+				$sql .= $this->db->prepare( " AND sub_id = %d", 0 );
 			}
 
 			$result = $this->db->get_col( $sql );
@@ -652,10 +688,10 @@ if(!class_exists('M_Membership')) {
 		function has_level($level_id = false) {
 			// Returns true if the user has a level to process
 
-			if($level_id) {
-				return isset($this->levels[$level_id]);
+			if($level_id && isset($this->levels[$level_id])) {
+				return true;
 			} else {
-				return !empty($this->levels);
+				return false;
 			}
 		}
 

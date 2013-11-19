@@ -4,12 +4,18 @@ Plugin Name: Dropdown Menus
 Plugin URI: http://interconnectit.com/?p=2190
 Description: Outputs WordPress Menus as a dropdown. Use the widget or the function <code>dropdown_menu();</code> with the same arguments as <code>wp_nav_menu();</code>.
 Author: Robert O'Rourke @ interconnect/it
-Version: 0.8
+Version: 1.0
 Author URI: http://interconnectit.com
 */
 
 /*
 Changelog:
+
+1.0:
+	added check for dropdown_menu function to better support embedding in themes
+
+0.9:
+	fixed debug code left in. Rookie mistake - sorry folks.
 
 0.8:
 	dropdown selector explicitly set to work on <select> elements to avoid conflict with twitter bootstrap
@@ -37,9 +43,7 @@ Changelog:
 */
 
 // useless without this
-if ( ! function_exists( 'wp_nav_menu' ) )
-	return false;
-
+if ( function_exists( 'wp_nav_menu' ) && ! function_exists( 'dropdown_menu' ) ) {
 
 /**
  * Tack on the blank option for urls not in the menu
@@ -79,7 +83,6 @@ function dropdown_javascript() {
 	<script>
 		var getElementsByClassName=function(a,b,c){if(document.getElementsByClassName){getElementsByClassName=function(a,b,c){c=c||document;var d=c.getElementsByClassName(a),e=b?new RegExp("\\b"+b+"\\b","i"):null,f=[],g;for(var h=0,i=d.length;h<i;h+=1){g=d[h];if(!e||e.test(g.nodeName)){f.push(g)}}return f}}else if(document.evaluate){getElementsByClassName=function(a,b,c){b=b||"*";c=c||document;var d=a.split(" "),e="",f="http://www.w3.org/1999/xhtml",g=document.documentElement.namespaceURI===f?f:null,h=[],i,j;for(var k=0,l=d.length;k<l;k+=1){e+="[contains(concat(' ', @class, ' '), ' "+d[k]+" ')]"}try{i=document.evaluate(".//"+b+e,c,g,0,null)}catch(m){i=document.evaluate(".//"+b+e,c,null,0,null)}while(j=i.iterateNext()){h.push(j)}return h}}else{getElementsByClassName=function(a,b,c){b=b||"*";c=c||document;var d=a.split(" "),e=[],f=b==="*"&&c.all?c.all:c.getElementsByTagName(b),g,h=[],i;for(var j=0,k=d.length;j<k;j+=1){e.push(new RegExp("(^|\\s)"+d[j]+"(\\s|$)"))}for(var l=0,m=f.length;l<m;l+=1){g=f[l];i=false;for(var n=0,o=e.length;n<o;n+=1){i=e[n].test(g.className);if(!i){break}}if(i){h.push(g)}}return h}}return getElementsByClassName(a,b,c)},
 			dropdowns = document.getElementsByTagName( 'select' );
-			console.log(dropdowns);
 		for ( i=0; i<dropdowns.length; i++ )
 			if ( dropdowns[i].className.match( '<?php echo apply_filters( 'dropdown_menus_class', 'dropdown-menu' ); ?>' ) ) dropdowns[i].onchange = function(){ if ( this.value != '' ) window.location.href = this.value; }
 	</script>
@@ -262,5 +265,7 @@ class DropDown_Menu_Widget extends WP_Widget {
 
 // add widget
 add_action( 'widgets_init', array( 'DropDown_Menu_Widget', 'init' ) );
+
+}
 
 ?>

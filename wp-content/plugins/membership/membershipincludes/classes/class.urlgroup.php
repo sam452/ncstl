@@ -54,11 +54,11 @@ if(!class_exists('M_Urlgroup')) {
 
 			echo '<tr class="form-field form-required">';
 			echo '<th style="" scope="row" valign="top">' . __('Group name','membership') . '</th>';
-			echo '<td valign="top"><input name="groupname" type="text" size="50" title="' . __('Group name') . '" style="width: 50%;" value="' . esc_attr(stripslashes($this->group->groupname)) . '" /></td>';
+			echo '<td valign="top"><input name="groupname" type="text" size="50" title="' . __('Group name','membership') . '" style="width: 50%;" value="' . esc_attr(stripslashes($this->group->groupname)) . '" /></td>';
 			echo '</tr>';
 
 			echo '<tr class="form-field form-required">';
-			echo '<th style="" scope="row" valign="top">' . __('Page URLs','automessage') . '</th>';
+			echo '<th style="" scope="row" valign="top">' . __('Page URLs','membership') . '</th>';
 			echo '<td valign="top"><textarea name="groupurls" rows="15" cols="40">' . esc_html(stripslashes($this->group->groupurls)) . '</textarea>';
 			// Display some instructions for the message.
 			echo "<br/><em style='font-size:smaller;'>" . __("You should place each page URL or expression on a new line.",'membership') . "</em>";
@@ -103,11 +103,11 @@ if(!class_exists('M_Urlgroup')) {
 
 			echo '<tr class="form-field form-required">';
 			echo '<th style="" scope="row" valign="top">' . __('Group name','membership') . '</th>';
-			echo '<td valign="top"><input name="groupname" type="text" size="50" title="' . __('Group name') . '" style="width: 50%;" value="" /></td>';
+			echo '<td valign="top"><input name="groupname" type="text" size="50" title="' . __('Group name','membership') . '" style="width: 50%;" value="" /></td>';
 			echo '</tr>';
 
 			echo '<tr class="form-field form-required">';
-			echo '<th style="" scope="row" valign="top">' . __('Page URLs','automessage') . '</th>';
+			echo '<th style="" scope="row" valign="top">' . __('Page URLs','membership') . '</th>';
 			echo '<td valign="top"><textarea name="groupurls" rows="15" cols="40"></textarea>';
 			// Display some instructions for the message.
 			echo "<br/><em style='font-size:smaller;'>" . __("You should place each page URL or expression on a new line.",'membership') . "</em>";
@@ -187,7 +187,6 @@ if(!class_exists('M_Urlgroup')) {
 				$host = substr( $host, 0, strpos($host, '?'));
 			}
 
-
 			if($this->group->isregexp == 0) {
 				// straight match
 				$newgroups = array_map('untrailingslashit', $groups);
@@ -202,9 +201,16 @@ if(!class_exists('M_Urlgroup')) {
 				$matchstring = "";
 				foreach($groups as $key => $value) {
 					if($matchstring != "") $matchstring .= "|";
-					$matchstring .= addcslashes($value,"/");
+
+					if( stripos($value, '\/') ) {
+						$matchstring .= stripcslashes($value);
+					} else {
+						$matchstring .= $value;
+					}
+
 				}
-				$matchstring = "/" . $matchstring . "/";
+				// switched to using a character that won't be in a url as the start and end markers
+				$matchstring = "#" . $matchstring . "#i";
 
 				if(preg_match($matchstring, $host, $matches) ) {
 					return true;
@@ -217,4 +223,127 @@ if(!class_exists('M_Urlgroup')) {
 
 	}
 }
+
+function M_create_internal_URL_group( $rule, $post, $level_id ) {
+
+	global $wpdb;
+
+	switch( $rule ) {
+		case 'posts':		$permalinks = array();
+							foreach( $_POST[$rule] as $rule ) {
+								$thelink = get_permalink( $rule );
+								$thelink = str_replace('http://', 'https?://', $thelink );
+								$permalinks[] = untrailingslashit($thelink) . '(/.*)';
+							}
+
+							$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_posts-' . $level_id );
+							$id = $wpdb->get_var( $sql );
+
+							$data = array( 	"groupname"	=> 	'_posts-' . $level_id,
+											"groupurls"	=>	implode("\n", $permalinks),
+											"isregexp"	=>	1,
+											"stripquerystring"	=> 1
+											);
+
+							if(!empty($id)) {
+								// exists so we're going to do an update
+								$wpdb->update( membership_db_prefix($wpdb, 'urlgroups'), $data, array( "id" => $id) );
+							} else {
+								// doesn't exist so we're going to do an add.
+								$wpdb->insert( membership_db_prefix($wpdb, 'urlgroups'), $data );
+							}
+
+							break;
+
+		case 'pages':		$permalinks = array();
+							foreach( $_POST[$rule] as $rule ) {
+								$thelink = get_permalink( $rule );
+								$thelink = str_replace('http://', 'https?://', $thelink );
+								$permalinks[] = untrailingslashit($thelink) . '(/.*)';
+							}
+
+							$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_pages-' . $level_id );
+							$id = $wpdb->get_var( $sql );
+
+							$data = array( 	"groupname"	=> 	'_pages-' . $level_id,
+											"groupurls"	=>	implode("\n", $permalinks),
+											"isregexp"	=>	1,
+											"stripquerystring"	=> 1
+											);
+
+							if(!empty($id)) {
+								// exists so we're going to do an update
+								$wpdb->update( membership_db_prefix($wpdb, 'urlgroups'), $data, array( "id" => $id) );
+							} else {
+								// doesn't exist so we're going to do an add.
+								$wpdb->insert( membership_db_prefix($wpdb, 'urlgroups'), $data );
+							}
+
+							break;
+
+			case 'bppages':		$permalinks = array();
+								foreach( $_POST[$rule] as $rule ) {
+									$thelink = get_permalink( $rule );
+									$thelink = str_replace('http://', 'https?://', $thelink );
+									$permalinks[] = untrailingslashit($thelink) . '(/.*)';
+								}
+
+								$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_bppages-' . $level_id);
+								$id = $wpdb->get_var( $sql );
+
+								$data = array( 	"groupname"	=> 	'_bppages-' . $level_id,
+												"groupurls"	=>	implode("\n", $permalinks),
+												"isregexp"	=>	1,
+												"stripquerystring"	=> 1
+												);
+
+								if(!empty($id)) {
+									// exists so we're going to do an update
+									$wpdb->update( membership_db_prefix($wpdb, 'urlgroups'), $data, array( "id" => $id) );
+								} else {
+									// doesn't exist so we're going to do an add.
+									$wpdb->insert( membership_db_prefix($wpdb, 'urlgroups'), $data );
+								}
+
+								break;
+
+			case 'bpgroups':	$permalinks = array();
+								if(function_exists('bp_get_group_permalink')) {
+									foreach( $_POST[$rule] as $rule ) {
+										$group = new BP_Groups_Group( $rule );
+										$thelink = bp_get_group_permalink( $group );
+										$thelink = str_replace('http://', 'https?://', $thelink );
+										$permalinks[] = untrailingslashit($thelink) . '(/.*)';
+									}
+								}
+
+
+								$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_bpgroups-' . $level_id);
+								$id = $wpdb->get_var( $sql );
+
+								$data = array( 	"groupname"	=> 	'_bpgroups-' . $level_id,
+												"groupurls"	=>	implode("\n", $permalinks),
+												"isregexp"	=>	1,
+												"stripquerystring"	=> 1
+												);
+
+								if(!empty($id)) {
+									// exists so we're going to do an update
+									$wpdb->update( membership_db_prefix($wpdb, 'urlgroups'), $data, array( "id" => $id) );
+								} else {
+									// doesn't exist so we're going to do an add.
+									$wpdb->insert( membership_db_prefix($wpdb, 'urlgroups'), $data );
+								}
+
+								break;
+
+	}
+
+}
+
+add_action( 'membership_update_positive_rule', 'M_create_internal_URL_group', 10, 3 );
+add_action( 'membership_update_negative_rule', 'M_create_internal_URL_group', 10, 3 );
+add_action( 'membership_add_positive_rule', 'M_create_internal_URL_group', 10, 3 );
+add_action( 'membership_add_negative_rule', 'M_create_internal_URL_group', 10, 3 );
+
 ?>

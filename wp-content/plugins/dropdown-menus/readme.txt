@@ -2,8 +2,8 @@
 Contributors: sanchothefat
 Tags: menus, dropdowns, mobile, ui, navigation, nav-menus
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: 0.8
+Tested up to: 3.5
+Stable tag: 1.0
 
 Display your WordPress menus as a dropdown select box. Great for mobile designs.
 
@@ -108,6 +108,12 @@ if ( ! function_exists( 'dropdown_menu' ) )
 
 
 == Changelog ==
+
+= 1.0 =
+* Added check for dropdown_menu being declared already to avoid issues if plugin is used and theme has it embedded
+
+= 0.9 =
+* Fixed debug code left in the JS that was affecting IE9 and below. Rookie mistake - really sorry folks.
 
 = 0.8 =
 * Dropdown selector explicitly set to work on <select> elements to avoid conflict with twitter bootstrap

@@ -1,12 +1,13 @@
 === font-resizer ===
-Contributors: chrigu99, cubetech
+Contributors: cubetech, chrigu99
 Donate link: http://www.cubetech.ch
 Tags: font, size, increase, decrease, resizer, bigger, smaller, jquery, cookie, fonts, resize, change, wordpress, cubetech, webdesign, hosting, billing, widget, plugin, sidebar
 Requires at least: 2.7
-Tested up to: 2.9
-Stable tag: 1.1.7
+Tested up to: 3.5
+Stable tag: 1.2.3
+License: GPLv2
 
-font-resizer allows the visitors of your blog to change the content font size
+font-resizer allows the visitors of your website to change the content font size
 
 == Description ==
 
@@ -36,10 +37,34 @@ Go to the admin page of the plugin and select your option. If you are not famili
 = How can i use the plugin without the widget? =
 Use this snippet of PHP code (in your theme or somewhere): &lt;?php if(function_exists('fontResizer_place')) { fontResizer_place(); } ?&gt;
 
+= How can i change the color of the A's? =
+With CSS in your theme.
+Use something like:
+li.fontResizer > a { color: blue; }
+
 = Are there more FAQ? =
 Not yet, no. But feel free to contact us if you have a question! info@cubetech.ch
 
 == Changelog ==
+
+= 1.2.3 =
+* Widget bug fix
+
+= 1.2.2 =
+
+* Added banner img
+
+= 1.2.1 =
+
+* Nothing relevant
+
+= 1.2.0 =
+
+* Fixed some deprecated functions
+
+= 1.1.9 =
+
+* Updated readme
 
 = 1.1.7 =
 

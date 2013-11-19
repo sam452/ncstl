@@ -2,14 +2,26 @@
 
 Contributors: visser
 Donate link: http://www.visser.com.au/#donations
-Tags: woocommerce, mod, aioseop, all in one seo pack
+Tags: woocommerce, mod, aioseop, all in one seo pack, product details
 Requires at least: 2.9.2
-Tested up to: 3.4
-Stable tag: 1.2
+Tested up to: 3.5.1
+Stable tag: 1.3.2
 
 Manage All in One SEO Pack meta details for WooCommerce Products within the Add/Edit Products view within the WordPress Administration.
 
 == Description ==
+
+This Plugin extends the <a href="http://wordpress.org/extend/plugins/all-in-one-seo-pack/">All in One SEO Pack</a> Plugin (by <a href="http://profiles.wordpress.org/hallsofmontezuma/">Michael Torbert</a>) to display the All in One SEO Pack dialog on the Add/Edit Products screen within WooCommerce. 
+Without this Plugin you cannot add/edit/manage All in One SEO Pack meta details which is why I developed this solution.
+
+Some features:
+
+* Title
+* Description
+* Keywords
+* Title Attributes
+* Menu Title
+* Disable Product
 
 For more information visit: http://www.visser.com.au/woocommerce/
 
@@ -17,6 +29,8 @@ For more information visit: http://www.visser.com.au/woocommerce/
 
 1. Upload the folder 'woocommerce-all-in-one-seo-pack' to the '/wp-content/plugins/' directory
 2. Activate 'WooCommerce - All in One SEO Pack' through the 'Plugins' menu in WordPress
+
+* Ensure 'All in One SEO Pack' Plugin is installed and activated; http://wordpress.org/extend/plugins/all-in-one-seo-pack/
 
 == Usage ==
 
@@ -33,6 +47,18 @@ If you have any problems, questions or suggestions please join the members discu
 http://www.visser.com.au/woocommerce/forums/
 
 == Changelog ==
+
+= 1.3.2 =
+* Fixed: Localhost link to image
+
+= 1.3.1 =
+* Fixed: Dashboard error
+
+= 1.3 =
+* Changed: Updated dialog to match WooCommerce styling
+* Added: Disable on this Product
+* Added: Descriptions and captions for All in One SEO Pack Product fields
+* Added: Display prompt if All in One SEO Pack is not activated
 
 = 1.2 =
 * Fixed: Added WooCommerce Plugins to WordPress Dashboard

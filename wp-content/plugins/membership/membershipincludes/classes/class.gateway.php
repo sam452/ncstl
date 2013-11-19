@@ -10,6 +10,7 @@ if(!class_exists('M_Gateway')) {
 		var $gateway = 'Not Set';
 		var $title = 'Not Set';
 		var $issingle = false;
+		var $haspaymentform = false;
 
 		// Tables
 		var $tables = array('subscription_transaction');
@@ -43,18 +44,18 @@ if(!class_exists('M_Gateway')) {
 
 		function toggleactivation() {
 
-			$active = get_option('M_active_gateways', array());
+			$active = get_option('membership_activated_gateways', array());
 
 			if(array_key_exists($this->gateway, $active)) {
 				unset($active[$this->gateway]);
 
-				update_option('M_active_gateways', $active);
+				update_option('membership_activated_gateways', $active);
 
 				return true;
 			} else {
 				$active[$this->gateway] = true;
 
-				update_option('M_active_gateways', $active);
+				update_option('membership_activated_gateways', $active);
 
 				return true;
 			}
@@ -63,14 +64,14 @@ if(!class_exists('M_Gateway')) {
 
 		function activate() {
 
-			$active = get_option('M_active_gateways', array());
+			$active = get_option('membership_activated_gateways', array());
 
-			if(array_key_exists($this->gateway, $active)) {
+			if(in_array($this->gateway, $active)) {
 				return true;
 			} else {
 				$active[$this->gateway] = true;
 
-				update_option('M_active_gateways', $active);
+				update_option('membership_activated_gateways', $active);
 
 				return true;
 			}
@@ -79,12 +80,12 @@ if(!class_exists('M_Gateway')) {
 
 		function deactivate() {
 
-			$active = get_option('M_active_gateways', array());
+			$active = get_option('membership_activated_gateways', array());
 
-			if(array_key_exists($this->gateway, $active)) {
+			if(in_array($this->gateway, $active)) {
 				unset($active[$this->gateway]);
 
-				update_option('M_active_gateways', $active);
+				update_option('membership_activated_gateways', $active);
 
 				return true;
 			} else {
@@ -95,8 +96,9 @@ if(!class_exists('M_Gateway')) {
 
 		function is_active() {
 
-			$active = get_option('M_active_gateways', array());
-			if(array_key_exists($this->gateway, $active)) {
+			$active = get_option('membership_activated_gateways', array());
+
+			if(in_array($this->gateway, $active)) {
 				return true;
 			} else {
 				return false;
@@ -180,7 +182,7 @@ if(!class_exists('M_Gateway')) {
 			$data['transaction_stamp'] = $timestamp;
 			$data['transaction_currency'] = $currency;
 			$data['transaction_status'] = $status;
-			$data['transaction_total_amount'] = (int) ($amount * 100);
+			$data['transaction_total_amount'] = (int) round($amount * 100);
 			$data['transaction_note'] = $note;
 			$data['transaction_gateway'] = $this->gateway;
 
@@ -322,8 +324,7 @@ if(!class_exists('M_Gateway')) {
 									</td>
 									<td class="column-date">
 										<?php
-											echo mysql2date("d-m-Y", $transaction->transaction_stamp);
-
+											echo date("d-m-Y", $transaction->transaction_stamp);
 										?>
 									</td>
 									<td class="column-amount">
@@ -398,22 +399,112 @@ if(!class_exists('M_Gateway')) {
 
 		}
 
+		function display_upgrade_from_free_button($subscription, $pricing, $user_id, $fromsub_id = false) {
+			// By default there is no default button available
+			echo "<form class=''>";
+			echo "<input type='submit' value=' " . __('Upgrades not available', 'membership') . " ' disabled='disabled' class='button blue' />";
+			echo "</form>";
+		}
+
 		function display_upgrade_button($pricing, $subscription, $user_id, $fromsub_id = false) {
 			// By default there is no default button available
 			echo "<form class=''>";
-			echo "<input type='submit' value=' " . __('Upgrades not available', 'membership') . " ' disabled='disabled' />";
+			echo "<input type='submit' value=' " . __('Upgrades not available', 'membership') . " ' disabled='disabled' class='button blue' />";
 			echo "</form>";
 		}
 
 		function display_cancel_button($subscription, $pricing, $user_id) {
 			// By default there is no default button available
 			echo '<form class="unsubbutton" action="" method="post">';
-			echo "<input type='button' value=' " . __('Unsubscribe not available', 'membership') . " ' disabled='disabled' />";
+			echo "<input type='button' value=' " . __('Unsubscribe not available', 'membership') . " ' disabled='disabled' class='button blue' />";
 			echo "</form>";
+		}
+
+		function display_payment_form() {
+			die('You Must Override The display_payment_form() in your gateway');
+		}
+
+		/* adding extra functions here to handle free subscriptions across a lot of gateways */
+
+		function single_free_button($pricing, $subscription, $user_id, $sublevel = 0) {
+
+			global $M_options;
+
+			if(empty($M_options['paymentcurrency'])) {
+				$M_options['paymentcurrency'] = 'USD';
+			}
+
+			$form = '';
+
+			$form .= '<form action="' . M_get_returnurl_permalink() . '" method="post">';
+			$form .= '<input type="hidden" name="custom" value="' . $this->build_custom($user_id, $subscription->id, '0', $sublevel) .'">';
+
+			if($sublevel == 1) {
+				$form .= '<input type="hidden" name="action" value="subscriptionsignup" />';
+				$form .=  wp_nonce_field('free-sub_' . $subscription->sub_id(), "_wpnonce", false, false);
+				$form .=  "<input type='hidden' name='gateway' value='" . $this->gateway . "' />";
+				$button = get_option( $this->gateway . "_payment_button", 'https://www.paypal.com/en_US/i/btn/btn_subscribe_LG.gif' );
+			} else {
+				$form .=  wp_nonce_field('renew-sub_' . $subscription->sub_id(), "_wpnonce", false, false);
+				//$form .=  wp_nonce_field('free-sub_' . $subscription->sub_id(), "_wpnonce", false, false);
+				$form .=  "<input type='hidden' name='action' value='subscriptionsignup' />";
+				$form .=  "<input type='hidden' name='gateway' value='" . $this->gateway . "' />";
+				$form .=  "<input type='hidden' name='subscription' value='" . $subscription->sub_id() . "' />";
+				$form .=  "<input type='hidden' name='user' value='" . $user_id . "' />";
+				$form .=  "<input type='hidden' name='level' value='" . $sublevel . "' />";
+				$button = get_option( $this->gateway . "_payment_button", 'http://www.paypal.com/en_US/i/btn/x-click-but23.gif' );
+			}
+
+			$form .= '<input type="image" name="submit" border="0" src="' . $button . '" alt="PayPal - The safer, easier way to pay online">';
+			$form .= '</form>';
+
+			return $form;
+
+		}
+
+		function signup_free_subscription($content, $error) {
+
+			if(isset($_POST['custom'])) {
+				list($timestamp, $user_id, $sub_id, $key) = explode(':', $_POST['custom']);
+			}
+
+			// create_subscription
+			$member = new M_Membership($user_id);
+			if($member) {
+				$member->create_subscription($sub_id, $this->gateway);
+			}
+
+			do_action('membership_payment_subscr_signup', $user_id, $sub_id);
+
+			$content .= '<div id="reg-form">'; // because we can't have an enclosing form for this part
+
+			$content .= '<div class="formleft">';
+
+			$message = get_option( $this->gateway . "_completed_message", $this->defaultmessage );
+			$content .= stripslashes($message);
+
+			$content .= '</div>';
+
+			$content .= "</div>";
+
+			$content = apply_filters('membership_subscriptionform_signedup', $content, $user_id, $sub_id);
+
+			return $content;
+
 		}
 
 	}
 
+}
+
+function M_is_gateway_active( $gateway ) {
+	global $M_Gateways;
+
+	if(isset($M_Gateways[$gateway])) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 function M_register_gateway($gateway, $class) {

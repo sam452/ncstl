@@ -6,16 +6,21 @@ if(!class_exists('M_Rule')) {
 		var $data;
 		var $name = 'none';
 		var $label = 'None Set';
+		var $description = '';
 
 		// The area of the rule - public, admin or core
 		var $rulearea = 'public';
 
-		function __construct() {
-			$this->on_creation();
+		var $level_id = false;
 
+		function __construct( $level_id = false ) {
+			// Store the level this rule is for
+			$this->level_id = $level_id;
+
+			$this->on_creation();
 		}
 
-		function M_Rule() {
+		function M_Rule( $tst ) {
 			$this->__construct();
 		}
 
@@ -23,8 +28,19 @@ if(!class_exists('M_Rule')) {
 			?>
 			<li class='draggable-level' id='<?php echo $this->name; ?>' <?php if($data === true) echo "style='display:none;'"; ?>>
 				<div class='action action-draggable'>
-					<div class='action-top'>
+					<div class='action-top closed'>
+					<a href="#available-actions" class="action-button hide-if-no-js"></a>
 					<?php _e($this->label,'membership'); ?>
+					</div>
+					<div class='action-body closed'>
+						<?php if(!empty($this->description)) { ?>
+							<p>
+								<?php _e($this->description, 'membership'); ?>
+							</p>
+						<?php } ?>
+						<p>
+							<a href='#addtopositive' class='action-to-positive' title='<?php _e('Add this rule to the positive area of the membership level.','membership'); ?>'><?php _e('Add to Positive rules','membership'); ?></a><a href='#addtonegative' class='action-to-negative' title='<?php _e('Add this rule to the negative area of the membership level.','membership'); ?>'><?php _e('Add to Negative rules','membership'); ?></a>
+						</p>
 					</div>
 				</div>
 			</li>

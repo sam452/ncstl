@@ -1,5 +1,27 @@
 var m_levelcount = 1;
 
+function m_colorsublevels() {
+
+	var levels = jQuery('#membership-levels-holder').sortable("toArray");
+
+	onserial = false;
+	if(levels.length > 1) {
+		for(n=0; n < levels.length; n++) {
+			mode = jQuery('#' + levels[n]).find('.sublevelmode').val();
+			if(onserial == true) {
+				jQuery('#' + levels[n]).addClass('afterserial');
+			} else {
+				jQuery('#' + levels[n]).removeClass('afterserial');
+			}
+
+			if(mode == 'serial' || mode == 'indefinite') {
+				onserial = true;
+			}
+		}
+	}
+
+}
+
 function m_removesublevel() {
 	var level = jQuery(this).parents('li.sortable-levels').attr('id');
 
@@ -7,6 +29,8 @@ function m_removesublevel() {
 
 
 	jQuery('#level-order').val( jQuery('#level-order').val().replace(',' + level, ''));
+
+	m_colorsublevels();
 
 	return false;
 }
@@ -33,6 +57,45 @@ function m_deletesub() {
 	}
 }
 
+function m_clickactiontoggle() {
+	if(jQuery(this).parent().hasClass('open')) {
+		jQuery(this).parent().removeClass('open').addClass('closed');
+		jQuery(this).parents('.action').find('.action-body').removeClass('open').addClass('closed');
+	} else {
+		jQuery(this).parent().removeClass('closed').addClass('open');
+		jQuery(this).parents('.action').find('.action-body').removeClass('closed').addClass('open');
+	}
+}
+
+function m_addtosubscription() {
+
+	moving = jQuery(this).parents('.level-draggable').attr('id');
+
+	var movingtitle = jQuery('#' + moving + ' div.action-top').html();
+
+	var cloned = jQuery('#template-holder').clone().html();
+
+	// remove the action link
+	movingtitle = movingtitle.replace('<a href="#available-actions" class="action-button hide-if-no-js"></a>', '');
+
+	cloned = cloned.replace('%startingpoint%', movingtitle);
+	cloned = cloned.replace('%templateid%', moving + '-' + m_levelcount);
+	cloned = cloned.replace(/%level%/gi, moving + '-' + m_levelcount);
+
+	jQuery(cloned).appendTo('#membership-levels-holder');
+
+	jQuery('a.removelink').unbind('click').click(m_removesublevel);
+
+	jQuery('#level-order').val( jQuery('#level-order').val() + ',' + moving + '-' + m_levelcount);
+
+	m_levelcount++;
+
+	m_colorsublevels();
+
+	return false;
+
+}
+
 function m_subsReady() {
 
 
@@ -56,6 +119,9 @@ function m_subsReady() {
 
 					var cloned = jQuery('#template-holder').clone().html();
 
+					// remove the action link
+					movingtitle = movingtitle.replace('<a href="#available-actions" class="action-button hide-if-no-js"></a>', '');
+
 					cloned = cloned.replace('%startingpoint%', movingtitle);
 					cloned = cloned.replace('%templateid%', moving + '-' + m_levelcount);
 					cloned = cloned.replace(/%level%/gi, moving + '-' + m_levelcount);
@@ -67,6 +133,8 @@ function m_subsReady() {
 					jQuery('#level-order').val( jQuery('#level-order').val() + ',' + moving + '-' + m_levelcount);
 
 					m_levelcount++;
+
+					m_colorsublevels();
 				}
 	});
 
@@ -76,6 +144,8 @@ function m_subsReady() {
 		placeholder: 'placeholder-levels',
 		update: function(event, ui) {
 				jQuery('#level-order').val(',' + jQuery('#membership-levels-holder').sortable('toArray').join(','));
+
+				m_colorsublevels();
 			}
 	});
 
@@ -85,6 +155,14 @@ function m_subsReady() {
 	jQuery('.delete a').click(m_deletesub);
 
 	jQuery('a.removelink').click(m_removesublevel);
+
+	jQuery('.action .action-top .action-button').click(m_clickactiontoggle);
+
+	jQuery('a.action-to-subscription').click(m_addtosubscription);
+
+	jQuery('.sublevelmode').change(m_colorsublevels);
+
+	m_levelcount = jQuery('li.sortable-levels').length + 1;
 
 }
 

@@ -4,6 +4,7 @@ class M_Posts extends M_Rule {
 
 	var $name = 'posts';
 	var $label = 'Posts';
+	var $description = 'Allows specific posts to be protected.';
 
 	var $rulearea = 'public';
 
@@ -76,60 +77,246 @@ class M_Posts extends M_Rule {
 		<?php
 	}
 
+	function redirect() {
+
+		membership_redirect_to_protected();
+
+	}
+
+	function get_group() {
+
+		global $wpdb;
+
+		$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_posts-' . $this->level_id );
+
+		$results = $wpdb->get_var( $sql );
+
+		if(!empty($results)) {
+			return $results;
+		} else {
+			return false;
+		}
+	}
+
 	function on_positive($data) {
 
 		$this->data = $data;
 
-		add_action('pre_get_posts', array(&$this, 'add_viewable_posts'), 1 );
+		add_action('pre_get_posts', array(&$this, 'add_viewable_posts'), 99 );
+
+		add_filter( 'the_posts', array(&$this, 'check_positive_posts'));
 	}
 
 	function on_negative($data) {
 
 		$this->data = $data;
 
-		add_action('pre_get_posts', array(&$this, 'add_unviewable_posts'), 1 );
+		add_action('pre_get_posts', array(&$this, 'add_unviewable_posts'), 99 );
+
+		add_filter( 'the_posts', array(&$this, 'check_negative_posts'));
 	}
 
 	function add_viewable_posts($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('post','')) || !empty($wp_query->query_vars['pagename'])) {
-			return;
+		global $M_options;
+
+		if( !$wp_query->is_singular && empty($wp_query->query_vars['pagename']) && (!isset($wp_query->query_vars['post_type']) || in_array($wp_query->query_vars['post_type'], array('post','')))) {
+
+			// We are in a list rather than on a single post
+			foreach( (array) $this->data as $key => $value ) {
+				$wp_query->query_vars['post__in'][] = $value;
+			}
+
+			$wp_query->query_vars['post__in'] = array_unique($wp_query->query_vars['post__in']);
+		} else {
+			// We are on a single post - wait until we get to the_posts
 		}
 
-		foreach( (array) $this->data as $key => $value ) {
-			$wp_query->query_vars['post__in'][] = $value;
-		}
 
-		$wp_query->query_vars['post__in'] = array_unique($wp_query->query_vars['post__in']);
 
 	}
 
 	function add_unviewable_posts($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('post','')) || !empty($wp_query->query_vars['pagename'])) {
-			return;
+		global $M_options;
+
+		if( !$wp_query->is_singular && empty($wp_query->query_vars['pagename']) && (!isset($wp_query->query_vars['post_type']) || in_array($wp_query->query_vars['post_type'], array('post','')))) {
+
+			// We are on a list rather than on a single post
+			foreach( (array) $this->data as $key => $value ) {
+				$wp_query->query_vars['post__not_in'][] = $value;
+			}
+
+			$wp_query->query_vars['post__not_in'] = array_unique($wp_query->query_vars['post__not_in']);
+
+		} else {
+			// We are on a single post - wait until we get to the_posts
 		}
 
-		foreach( (array) $this->data as $key => $value ) {
-			$wp_query->query_vars['post__not_in'][] = $value;
+
+	}
+
+	function check_negative_posts( $posts ) {
+
+		global $wp_query, $M_options;
+
+		if( !$wp_query->is_singular || count($posts) > 1) {
+			return $posts;
 		}
 
-		$wp_query->query_vars['post__not_in'] = array_unique($wp_query->query_vars['post__not_in']);
+		if(!empty($posts) && count($posts) == 1) {
+			// we may be on a restricted post so check the URL and redirect if needed
+
+			$redirect = false;
+			$url = '';
+
+			$exclude = array();
+			if(!empty($M_options['registration_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['registration_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['registration_page'] ));
+			}
+
+			if(!empty($M_options['account_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['account_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['account_page'] ));
+			}
+
+			if(!empty($M_options['nocontent_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['nocontent_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['nocontent_page'] ));
+			}
+
+			if(!empty($wp_query->query_vars['protectedfile']) && !$forceviewing) {
+				$exclude[] = $host;
+				$exclude[] = untrailingslashit($host);
+			}
+
+			foreach($posts as $post) {
+				if($post->post_type != 'post') {
+					continue;
+				}
+
+				if(!in_array(strtolower( get_permalink($post->ID) ), $exclude)) {
+					$url = get_permalink($post->ID);
+				}
+			}
+
+			// Check if we have a url available to check
+			if(empty($url)) {
+				return $posts;
+			}
+
+			// we have the current page / url - get the groups selected
+			$group_id = $this->get_group();
+
+			if($group_id) {
+				$group = new M_Urlgroup( $group_id );
+
+				if( !empty($url) && $group->url_matches( $url ) ) {
+					$redirect = true;
+				}
+			}
+
+			if($redirect === true && !empty($M_options['nocontent_page'])) {
+				// we need to redirect
+				$this->redirect();
+			} else {
+				return $posts;
+			}
+		}
+
+		return $posts;
+
+	}
+
+	function check_positive_posts( $posts ) {
+
+		global $wp_query, $M_options;
+
+		if( !$wp_query->is_singular || count($posts) > 1) {
+			return $posts;
+		}
+
+		if(!empty($posts) && count($posts) == 1) {
+			// we may be on a restricted post so check the URL and redirect if needed
+
+			$redirect = false;
+			$found = false;
+			$url = '';
+
+			$exclude = array();
+			if(!empty($M_options['registration_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['registration_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['registration_page'] ));
+			}
+
+			if(!empty($M_options['account_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['account_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['account_page'] ));
+			}
+
+			if(!empty($M_options['nocontent_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['nocontent_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['nocontent_page'] ));
+			}
+
+			if(!empty($wp_query->query_vars['protectedfile']) && !$forceviewing) {
+				$exclude[] = $host;
+				$exclude[] = untrailingslashit($host);
+			}
+
+			foreach($posts as $post) {
+				if($post->post_type != 'post') {
+					continue;
+				}
+
+				if(!in_array(strtolower( get_permalink($post->ID) ), $exclude)) {
+					$url = get_permalink($post->ID);
+				}
+			}
+
+			// Check if we have a url available to check
+			if(empty($url)) {
+				return $posts;
+			}
+
+			// we have the current page / url - get the groups selected
+			$group_id = $this->get_group();
+
+			if($group_id) {
+				$group = new M_Urlgroup( $group_id );
+
+				if( $group->url_matches( $url ) ) {
+					$found = true;
+				}
+			}
+
+			if($found !== true && !empty($M_options['nocontent_page'])) {
+				// we need to redirect
+				$this->redirect();
+			} else {
+				return $posts;
+			}
+
+		}
+
+		return $posts;
 
 	}
 
 }
-M_register_rule('posts', 'M_Posts', 'main');
 
 class M_Pages extends M_Rule {
 
 	var $name = 'pages';
 	var $label = 'Pages';
+	var $description = 'Allows specific pages to be protected.';
 
 	var $rulearea = 'public';
 
 	function admin_main($data) {
 		if(!$data) $data = array();
+
 		?>
 		<div class='level-operation' id='main-pages'>
 			<h2 class='sidebar-name'><?php _e('Pages', 'membership');?><span><a href='#remove' id='remove-pages' class='removelink' title='<?php _e("Remove Pages from this rules area.",'membership'); ?>'><?php _e('Remove','membership'); ?></a></span></h2>
@@ -146,6 +333,10 @@ class M_Pages extends M_Rule {
 					);
 
 					$posts = get_posts($args);
+
+					// to remove bp specified pages - should be listed on the bp pages group
+					$posts = apply_filters( 'staypress_hide_protectable_pages', $posts );
+
 					if($posts) {
 						?>
 						<table cellspacing="0" class="widefat fixed">
@@ -166,6 +357,7 @@ class M_Pages extends M_Rule {
 							<tbody>
 						<?php
 						foreach($posts as $key => $post) {
+
 							?>
 							<tr valign="middle" class="alternate" id="post-<?php echo $post->ID; ?>">
 								<th class="check-column" scope="row">
@@ -194,8 +386,9 @@ class M_Pages extends M_Rule {
 
 		$this->data = $data;
 
-		add_action('pre_get_posts', array(&$this, 'add_viewable_pages'), 1 );
-		add_filter('get_pages', array(&$this, 'add_viewable_pages_menu'));
+		add_filter('get_pages', array(&$this, 'add_viewable_pages_menu'), 1);
+
+		add_filter( 'the_posts', array(&$this, 'check_positive_pages'));
 
 	}
 
@@ -203,27 +396,58 @@ class M_Pages extends M_Rule {
 
 		$this->data = $data;
 
-		add_action('pre_get_posts', array(&$this, 'add_unviewable_pages'), 1 );
-		add_filter('get_pages', array(&$this, 'add_unviewable_pages_menu'));
+		add_filter('get_pages', array(&$this, 'add_unviewable_pages_menu'), 1);
+
+		add_filter( 'the_posts', array(&$this, 'check_negative_pages'));
+
+	}
+
+	function redirect() {
+
+		membership_redirect_to_protected();
+
+	}
+
+	function get_group() {
+
+		global $wpdb;
+
+		$sql = $wpdb->prepare( "SELECT id FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname = %s ORDER BY id DESC LIMIT 0,1", '_pages-' . $this->level_id );
+
+		$results = $wpdb->get_var( $sql );
+
+		if(!empty($results)) {
+			return $results;
+		} else {
+			return false;
+		}
 	}
 
 	function add_viewable_pages($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('page','')) || empty($wp_query->query_vars['pagename'])) {
-			return;
-		}
+		global $M_options;
 
-		foreach( (array) $this->data as $key => $value ) {
-			$wp_query->query_vars['post__in'][] = $value;
-		}
+		print_r($wp_query);
 
-		$wp_query->query_vars['post__in'] = array_unique($wp_query->query_vars['post__in']);
+		if(!$wp_query->is_single && !empty($wp_query->query_vars['post__in'])) {
+			// We are not on a single page - so just limit the viewing
+			foreach( (array) $this->data as $key => $value ) {
+				$wp_query->query_vars['post__in'][] = $value;
+			}
+
+			$wp_query->query_vars['post__in'] = array_unique($wp_query->query_vars['post__in']);
+		} else {
+			// We are on a single page - so check for restriction on the_posts
+		}
 
 	}
 
 	function add_viewable_pages_menu($pages) {
+
+		$override_pages = apply_filters( 'membership_override_viewable_pages_menu', array() );
+
 		foreach( (array) $pages as $key => $page ) {
-			if(!in_array($page->ID, (array) $this->data)) {
+			if(!in_array($page->ID, (array) $this->data) && !in_array($page->ID, (array) $override_pages)) {
 				unset($pages[$key]);
 			}
 		}
@@ -234,15 +458,9 @@ class M_Pages extends M_Rule {
 
 	function add_unviewable_pages($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('page','')) || empty($wp_query->query_vars['pagename'])) {
-			return;
-		}
+		global $M_options;
 
-		foreach( (array) $this->data as $key => $value ) {
-			$wp_query->query_vars['post__not_in'][] = $value;
-		}
-
-		$wp_query->query_vars['post__not_in'] = array_unique($wp_query->query_vars['post__not_in']);
+		return;
 
 	}
 
@@ -256,13 +474,163 @@ class M_Pages extends M_Rule {
 		return $pages;
 	}
 
+	function check_negative_pages( $posts ) {
+
+		global $wp_query, $M_options;
+
+		if(!$wp_query->is_singular || count($posts) > 1) {
+			return $posts;
+		}
+
+		if(!empty($posts) && count($posts) == 1) {
+			// we may be on a restricted post so check the URL and redirect if needed
+
+			$redirect = false;
+			$url = '';
+
+			$exclude = array();
+			if(!empty($M_options['registration_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['registration_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['registration_page'] ));
+			}
+
+			if(!empty($M_options['account_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['account_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['account_page'] ));
+			}
+
+			if(!empty($M_options['nocontent_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['nocontent_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['nocontent_page'] ));
+			}
+
+			if(!empty($wp_query->query_vars['protectedfile']) && !$forceviewing) {
+				$exclude[] = $host;
+				$exclude[] = untrailingslashit($host);
+			}
+
+			foreach($posts as $post) {
+				if($post->post_type != 'page') {
+					continue;
+				}
+
+				if(!in_array(strtolower( get_permalink($post->ID) ), $exclude)) {
+					$url = get_permalink($post->ID);
+				}
+			}
+
+			// Check if we have a url available to check
+			if(empty($url)) {
+				return $posts;
+			}
+
+			// we have the current page / url - get the groups selected
+			$group_id = $this->get_group();
+
+			if($group_id) {
+				$group = new M_Urlgroup( $group_id );
+
+				if( $group->url_matches( $url ) ) {
+					$redirect = true;
+				}
+			}
+
+			if($redirect === true && !empty($M_options['nocontent_page'])) {
+				// we need to redirect
+				$this->redirect();
+			} else {
+				return $posts;
+			}
+
+		}
+
+		return $posts;
+
+	}
+
+	function check_positive_pages( $posts ) {
+
+		global $wp_query, $M_options;
+
+		if(!$wp_query->is_singular || count($posts) > 1) {
+			return $posts;
+		}
+
+		if(!empty($posts) && count($posts) == 1) {
+			// we may be on a restricted post so check the URL and redirect if needed
+
+			$redirect = false;
+			$found = false;
+			$url = '';
+
+			$exclude = array();
+			if(!empty($M_options['registration_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['registration_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['registration_page'] ));
+			}
+
+			if(!empty($M_options['account_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['account_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['account_page'] ));
+			}
+
+			if(!empty($M_options['nocontent_page'])) {
+				$exclude[] = get_permalink( (int) $M_options['nocontent_page'] );
+				$exclude[] = untrailingslashit(get_permalink( (int) $M_options['nocontent_page'] ));
+			}
+
+			if(!empty($wp_query->query_vars['protectedfile']) && !$forceviewing) {
+				$exclude[] = $host;
+				$exclude[] = untrailingslashit($host);
+			}
+
+			foreach($posts as $post) {
+				if($post->post_type != 'page') {
+					continue;
+				}
+
+				if(!in_array(strtolower( get_permalink($post->ID) ), $exclude)) {
+					$url = get_permalink($post->ID);
+				}
+			}
+
+			// Check if we have a url available to check
+			if(empty($url)) {
+				return $posts;
+			}
+
+			// we have the current page / url - get the groups selected
+			$group_id = $this->get_group();
+
+			if($group_id) {
+				$group = new M_Urlgroup( $group_id );
+
+				if( $group->url_matches( $url ) ) {
+					$found = true;
+				}
+			}
+
+			if($found !== true && !empty($M_options['nocontent_page'])) {
+				// we need to redirect
+				$this->redirect();
+			} else {
+				return $posts;
+			}
+
+		}
+
+		return $posts;
+
+	}
+
+
 }
-M_register_rule('pages', 'M_Pages', 'main');
 
 class M_Categories extends M_Rule {
 
 	var $name = 'categories';
 	var $label = 'Categories';
+	var $description = 'Allows posts to be protected based on their assigned categories.';
 
 	var $rulearea = 'public';
 
@@ -324,6 +692,8 @@ class M_Categories extends M_Rule {
 
 		add_action( 'pre_get_posts', array(&$this, 'add_viewable_posts'), 1 );
 		add_filter( 'get_terms', array(&$this, 'add_viewable_categories'), 1, 3 );
+
+		add_filter( 'the_posts', array(&$this, 'check_positive_posts'));
 	}
 
 	function on_negative($data) {
@@ -332,11 +702,94 @@ class M_Categories extends M_Rule {
 
 		add_action('pre_get_posts', array(&$this, 'add_unviewable_posts'), 1 );
 		add_filter( 'get_terms', array(&$this, 'add_unviewable_categories'), 1, 3 );
+
+		add_filter( 'the_posts', array(&$this, 'check_negative_posts'));
+	}
+
+	function redirect() {
+
+		membership_redirect_to_protected();
+
+	}
+
+	function check_negative_posts( $posts ) {
+
+		global $wp_query, $M_options;
+
+		$redirect = false;
+
+		if(is_category() && count($posts) == 0 && MEMBERSHIP_REDIRECT_ON_EMPTY_CATEGORYPAGE === true) {
+			$redirect = true;
+		}
+
+		if((!$wp_query->is_singular || count($posts) > 1) && $redirect != true) {
+			return $posts;
+		}
+
+		foreach($posts as $post) {
+			// should only be one as otherwise the single check above didn't work very well.
+			if($post->post_type != 'post') {
+				// Not a post so ignore
+				return $posts;
+			} else {
+				// Check the categories
+				if(has_category( $this->data, $post )) {
+					$redirect = true;
+				}
+			}
+		}
+
+		if($redirect === true && !empty($M_options['nocontent_page'])) {
+			// we need to redirect
+			$this->redirect();
+		} else {
+			return $posts;
+		}
+
+	}
+
+	function check_positive_posts( $posts ) {
+
+		global $wp_query, $M_options;
+
+		$redirect = false;
+
+		if(is_category() && count($posts) == 0 && MEMBERSHIP_REDIRECT_ON_EMPTY_CATEGORYPAGE === true) {
+			$redirect = true;
+		}
+
+		if((!$wp_query->is_singular || count($posts) > 1) && $redirect != true) {
+			return $posts;
+		}
+
+		foreach($posts as $post) {
+			// should only be one as otherwise the single check above didn't work very well.
+			if($post->post_type != 'post') {
+				// Not a post so ignore
+				return $posts;
+			} else {
+				// Check the categories
+				if(!has_category( $this->data, $post )) {
+					$redirect = true;
+				}
+
+			}
+		}
+
+		if($redirect === true && !empty($M_options['nocontent_page'])) {
+			// we need to redirect
+			$this->redirect();
+		} else {
+			return $posts;
+		}
+
 	}
 
 	function add_viewable_posts($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('post','')) || !empty($wp_query->query_vars['pagename'])) {
+		//print_r($wp_query);
+
+		if((isset($wp_query->query_vars['post_type']) && !in_array($wp_query->query_vars['post_type'], array('post',''))) || !empty($wp_query->query_vars['pagename'])) {
 			return;
 		}
 
@@ -350,7 +803,7 @@ class M_Categories extends M_Rule {
 
 	function add_unviewable_posts($wp_query) {
 
-		if(!in_array($wp_query->query_vars['post_type'], array('post','')) || !empty($wp_query->query_vars['pagename'])) {
+		if( (isset($wp_query->query_vars['post_type']) && !in_array($wp_query->query_vars['post_type'], array('post',''))) || !empty($wp_query->query_vars['pagename'])) {
 			return;
 		}
 
@@ -389,12 +842,12 @@ class M_Categories extends M_Rule {
 	}
 
 }
-M_register_rule('categories', 'M_Categories', 'main');
 
 class M_More extends M_Rule {
 
 	var $name = 'more';
 	var $label = 'More tag';
+	var $description = 'Allows content placed after the More tag to be protected.';
 
 	var $rulearea = 'public';
 
@@ -418,7 +871,7 @@ class M_More extends M_Rule {
 
 		$this->data = $data;
 
-		if($M_options['moretagdefault'] == 'no' ) {
+		if(isset($M_options['moretagdefault']) && $M_options['moretagdefault'] == 'no' ) {
 
 			// remove the filters - otherwise we don't need to do anything
 			if(isset($wp_filter['the_content_more_link'][99])) {
@@ -463,7 +916,7 @@ class M_More extends M_Rule {
 
 		$this->data = $data;
 
-		if($M_options['moretagdefault'] != 'no' ) {
+		if(isset($M_options['moretagdefault']) && $M_options['moretagdefault'] != 'no' ) {
 			// add the filters - otherwise we don't need to do anything
 			add_filter('the_content_more_link', array(&$this, 'show_moretag_protection'), 99, 2);
 			add_filter('the_content', array(&$this, 'replace_moretag_content'), 1);
@@ -494,12 +947,12 @@ class M_More extends M_Rule {
 	}
 
 }
-M_register_rule('more', 'M_More', 'main');
 
 class M_Comments extends M_Rule {
 
 	var $name = 'comments';
 	var $label = 'Comments';
+	var $description = 'Allows the display of, or ability to comment on posts to be protected.';
 
 	var $rulearea = 'public';
 
@@ -558,12 +1011,13 @@ class M_Comments extends M_Rule {
 	}
 
 }
-M_register_rule('comments', 'M_Comments', 'main');
+
 
 class M_Downloads extends M_Rule {
 
 	var $name = 'downloads';
 	var $label = 'Downloads';
+	var $description = 'Allows media uploaded to the WordPress media library to be protected.';
 
 	var $rulearea = 'public';
 
@@ -624,7 +1078,7 @@ class M_Downloads extends M_Rule {
 
 						} else {
 							?>
-							<tr valign="middle" class="alternate" id="post-<?php echo $category->term_id; ?>">
+							<tr valign="middle" class="alternate" id="group-nogroup">
 								<td class="column-name" colspan='2'>
 									<?php echo __('You have no download groups set, please visit the membership options page to set them up.','membership'); ?>
 								</td>
@@ -663,13 +1117,12 @@ class M_Downloads extends M_Rule {
 
 }
 
-M_register_rule('downloads', 'M_Downloads', 'content');
-
 //shortcode_tags
 class M_Shortcodes extends M_Rule {
 
 	var $name = 'shortcodes';
 	var $label = 'Shortcodes';
+	var $description = 'Allows specific shortcodes and contained content to be protected.';
 
 	var $rulearea = 'public';
 
@@ -793,12 +1246,12 @@ class M_Shortcodes extends M_Rule {
 	}
 
 }
-M_register_rule('shortcodes', 'M_Shortcodes', 'content');
 
 class M_Menu extends M_Rule {
 
 	var $name = 'menu';
 	var $label = 'Menu';
+	var $description = 'Allows specific menu items to be protected.';
 
 	var $rulearea = 'public';
 
@@ -914,12 +1367,140 @@ class M_Menu extends M_Rule {
 	}
 
 }
-M_register_rule('menu', 'M_Menu', 'main');
+
+class M_Blogcreation extends M_Rule {
+
+	var $name = 'blogcreation';
+	var $label = 'Blog Creation';
+	var $description = 'Allows the creation of blogs to be limited to members.';
+
+	var $rulearea = 'core';
+
+	function admin_main($data) {
+		if(!$data) $data = array();
+		?>
+		<div class='level-operation' id='main-blogcreation'>
+			<h2 class='sidebar-name'><?php _e('Blog Creation', 'membership');?><span><a href='#remove' id='remove-blogcreation' class='removelink' title='<?php _e("Remove Blog Creation from this rules area.",'membership'); ?>'><?php _e('Remove','membership'); ?></a></span></h2>
+			<div class='inner-operation'>
+				<?php
+					if(!isset($data['number'])) {
+						$data['number'] = '';
+					}
+				?>
+				<p><strong><?php _e('Positive : ','membership'); ?></strong><?php _e('User can create ','membership'); ?><input type='text' name='blogcreation[number]' value='<?php echo esc_attr($data['number']); ?>' /><?php _e(' blogs.','membership'); ?><br/><em><?php _e('Leave blank for unlimited blogs.','membership'); ?></em></p>
+				<p><strong><?php _e('Negative : ','membership'); ?></strong><?php _e('User is unable to create any blogs.','membership'); ?></p>
+				<input type='hidden' name='blogcreation[]' value='yes' />
+			</div>
+		</div>
+		<?php
+	}
+
+	function on_creation() {
+
+	}
+
+	function on_positive($data) {
+
+		$this->data = $data;
+
+		add_filter( 'site_option_registration', array(&$this, 'pos_blog_creation'));
+		add_filter( 'wpmu_active_signup', array(&$this, 'pos_blog_creation') );
+	}
+
+	function on_negative($data) {
+
+		$this->data = $data;
+
+		add_filter( 'site_option_registration', array(&$this, 'neg_blog_creation'));
+		add_filter( 'wpmu_active_signup', array(&$this, 'neg_blog_creation') );
+
+	}
+
+	function neg_blog_creation( $active = 'all' ) {
+
+		if($active == 'user' || $active == 'none') {
+			return $active;
+		} else {
+			return 'none';
+		}
+
+	}
+
+	function pos_blog_creation( $active = 'all' ) {
+
+		if($active == 'user' || $active == 'none') {
+			return $active;
+		} else {
+			// Check our count
+			if(empty($this->data['number'])) {
+				//  unlimited
+				return $active;
+			} else {
+				$thelimit = (int) $this->data['number'];
+
+				if( $thelimit > (int) $this->current_blog_count() ) {
+					return $active;
+				} else {
+					return $this->neg_blog_creation( $active );
+				}
+			}
+
+		}
+
+	}
+
+	function current_blog_count() {
+
+		global $member, $wpdb;
+
+		if(!empty($member) && method_exists($member, 'has_cap')) {
+			// We have a member and it is a correct object
+			$count = 0;
+			$blogs = get_blogs_of_user( $member->ID );
+			foreach( $blogs as $blog ) {
+				if( $this->is_user_blog_admin( $member->ID, $blog->userblog_id ) ) {
+					$count++;
+	         	}
+			}
+
+			return (int) $count;
+		} else {
+			return 0;
+		}
+
+	}
+
+	function is_user_blog_admin( $user_id, $blog_id ) {
+		global $wpdb;
+
+	    $meta_key = $wpdb->base_prefix . $blog_id . "_capabilities";
+
+		$role_sql = $wpdb->prepare( "SELECT user_id, meta_value FROM {$wpdb->usermeta} WHERE meta_key = %s", $meta_key );
+
+		$role = $wpdb->get_results( $role_sql );
+
+		//clean the role
+		foreach($role as $key => $r) {
+			$role[$key]->meta_value = maybe_unserialize($r->meta_value);
+		}
+
+		foreach($role as $key => $r) {
+			if( $r->meta_value['administrator'] == 1 && $r->user_id == $user_id ) {
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+}
 
 class M_URLGroups extends M_Rule {
 
 	var $name = 'urlgroups';
 	var $label = 'URL Groups';
+	var $description = "Allows specific URL's to be protected (includes ability to protect using regular expressions).";
 
 	var $rulearea = 'core';
 
@@ -927,7 +1508,7 @@ class M_URLGroups extends M_Rule {
 
 		global $wpdb;
 
-		$sql = $wpdb->prepare( "SELECT * FROM " . membership_db_prefix($wpdb, 'urlgroups') . " ORDER BY id ASC" );
+		$sql = $wpdb->prepare( "SELECT * FROM " . membership_db_prefix($wpdb, 'urlgroups') . " WHERE groupname NOT LIKE (%s) ORDER BY id ASC", '\_%' );
 
 		$results = $wpdb->get_results( $sql );
 
@@ -1012,6 +1593,7 @@ class M_URLGroups extends M_Rule {
 		global $M_options, $wp_query;
 
 		$redirect = false;
+		$found = false;
 		$host = '';
 		if(is_ssl()) {
 			$host = "https://";
@@ -1045,12 +1627,13 @@ class M_URLGroups extends M_Rule {
 		foreach((array) $this->data as $group_id) {
 			$group = new M_Urlgroup( $group_id );
 
-			if(!$group->url_matches( $host ) && !in_array(strtolower($host), $exclude)) {
-				$redirect = true;
+			if($group->url_matches( $host ) && !in_array(strtolower($host), $exclude)) {
+				// We've found a pge in the positive rules so can let the user see it
+				$found = true;
 			}
 		}
 
-		if($redirect === true) {
+		if($found !== true) {
 			// we need to redirect
 			$this->redirect();
 		}
@@ -1107,16 +1690,29 @@ class M_URLGroups extends M_Rule {
 
 	function redirect() {
 
-		global $M_options;
-
-		$url = get_permalink( (int) $M_options['nocontent_page'] );
-
-		wp_safe_redirect( $url );
-		exit;
+		membership_redirect_to_protected();
 
 	}
 
 }
-M_register_rule('urlgroups', 'M_URLGroups', 'main');
+
+function M_setup_default_rules() {
+
+	M_register_rule('downloads', 'M_Downloads', 'content');
+	M_register_rule('comments', 'M_Comments', 'main');
+	M_register_rule('more', 'M_More', 'main');
+	M_register_rule('categories', 'M_Categories', 'main');
+	M_register_rule('pages', 'M_Pages', 'main');
+	M_register_rule('posts', 'M_Posts', 'main');
+	M_register_rule('shortcodes', 'M_Shortcodes', 'content');
+	M_register_rule('menu', 'M_Menu', 'main');
+	M_register_rule('urlgroups', 'M_URLGroups', 'main');
+
+	if(is_multisite()) {
+		M_register_rule('blogcreation', 'M_Blogcreation', 'admin');
+	}
+
+}
+add_action('plugins_loaded', 'M_setup_default_rules', 99);
 
 ?>

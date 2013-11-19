@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce - All in One SEO Pack
 Plugin URI: http://www.visser.com.au/woocommerce/plugins/all-in-one-seo-pack/
 Description: Manage All in One SEO Pack meta details for WooCommerce Products within the Add/Edit Products view within the WordPress Administration.
-Version: 1.2
+Version: 1.3.2
 Author: Visser Labs
 Author URI: http://www.visser.com.au/about/
 License: GPL2

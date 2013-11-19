@@ -91,6 +91,22 @@ if(!class_exists('M_Subscription')) {
 
 		}
 
+		function sub_pricetext() {
+
+			if(empty($this->subscription)) {
+				$sub = $this->get();
+
+				if($sub) {
+					return stripslashes($sub->sub_pricetext);
+				} else {
+					return false;
+				}
+			} else {
+				return stripslashes($this->subscription->sub_pricetext);
+			}
+
+		}
+
 		function get_pricingarray() {
 
 			$levels = $this->get_levels();
@@ -219,21 +235,15 @@ if(!class_exists('M_Subscription')) {
 				return false;
 			}
 
-			if($this->count() == 0 || $force) {
+			$sql = $this->db->prepare( "UPDATE {$this->subscriptions} SET sub_active = NOT sub_active WHERE id = %d", $this->id);
 
-				$sql = $this->db->prepare( "UPDATE {$this->subscriptions} SET sub_active = NOT sub_active WHERE id = %d", $this->id);
+			$this->dirty = true;
 
-				$this->dirty = true;
+			$result = $this->db->query($sql);
 
-				$result = $this->db->query($sql);
+			do_action( 'membership_toggleactivate_subscription', $this->id, $result );
 
-				do_action( 'membership_toggleactivate_subscription', $this->id, $result );
-
-				return $result;
-			} else {
-				return false;
-			}
-
+			return $result;
 
 		}
 
@@ -262,25 +272,21 @@ if(!class_exists('M_Subscription')) {
 				return false;
 			}
 
-			if($this->count() == 0 || $force) {
-				$sql = $this->db->prepare( "DELETE FROM {$this->subscriptions} WHERE id = %d", $this->id);
 
-				$sql2 = $this->db->prepare( "DELETE FROM {$this->subscriptions_levels} WHERE sub_id = %d", $this->id);
+			$sql = $this->db->prepare( "DELETE FROM {$this->subscriptions} WHERE id = %d", $this->id);
 
-				if($this->db->query($sql)) {
+			$sql2 = $this->db->prepare( "DELETE FROM {$this->subscriptions_levels} WHERE sub_id = %d", $this->id);
 
-					$this->db->query($sql2);
+			if($this->db->query($sql)) {
 
-					$this->dirty = true;
+				$this->db->query($sql2);
 
-					do_action( 'membership_delete_subscription', $this->id );
-				}
+				$this->dirty = true;
 
-				return true;
-
-			} else {
-				return false;
+				do_action( 'membership_delete_subscription', $this->id );
 			}
+
+			return true;
 
 		}
 
@@ -292,7 +298,7 @@ if(!class_exists('M_Subscription')) {
 				$this->update();
 			} else {
 
-				$return = $this->db->insert($this->subscriptions, array('sub_name' => $_POST['sub_name'], 'sub_description' => $_POST['sub_description']));
+				$return = $this->db->insert($this->subscriptions, array('sub_name' => $_POST['sub_name'], 'sub_description' => $_POST['sub_description'], 'sub_pricetext' => $_POST['sub_pricetext']));
 				$this->id = $this->db->insert_id;
 
 				if(!empty($_POST['level-order'])) {
@@ -321,7 +327,7 @@ if(!class_exists('M_Subscription')) {
 							}
 
 							if(isset($_POST['levelprice'][$level])) {
-								$levelprice = esc_attr($_POST['levelprice'][$level]);
+								$levelprice = floatval(esc_attr($_POST['levelprice'][$level]));
 							} else {
 								$levelprice = '';
 							}
@@ -373,7 +379,7 @@ if(!class_exists('M_Subscription')) {
 				$this->add();
 			} else {
 
-				$return = $this->db->update($this->subscriptions, array('sub_name' => $_POST['sub_name'], 'sub_description' => $_POST['sub_description']), array('id' => $this->id));
+				$return = $this->db->update($this->subscriptions, array('sub_name' => $_POST['sub_name'], 'sub_description' => $_POST['sub_description'], 'sub_pricetext' => $_POST['sub_pricetext']), array('id' => $this->id));
 
 				// Remove the existing rules for this subscription level
 				$this->db->query( $this->db->prepare( "DELETE FROM {$this->subscriptions_levels} WHERE sub_id = %d", $this->id ) );
@@ -404,7 +410,7 @@ if(!class_exists('M_Subscription')) {
 							}
 
 							if(isset($_POST['levelprice'][$level])) {
-								$levelprice = esc_attr($_POST['levelprice'][$level]);
+								$levelprice = floatval(esc_attr($_POST['levelprice'][$level]));
 							} else {
 								$levelprice = '';
 							}
@@ -485,6 +491,8 @@ if(!class_exists('M_Subscription')) {
 							</select>
 
 						<label for='levelprice[%level%]'><?php _e('Price : ','membership'); ?></label>
+						<input type='text' name='levelprice[%level%]' value='' class='narrow' />
+						<?php /* ?>
 						<select name='levelprice[%level%]'>
 							<option value=''></option>
 							<?php
@@ -494,7 +502,7 @@ if(!class_exists('M_Subscription')) {
 									<?php
 								}
 							?>
-						</select>&nbsp;
+						</select><?php */ ?>&nbsp;
 						<?php
 							if(!empty($M_options['paymentcurrency'])) {
 								echo esc_html($M_options['paymentcurrency']);
@@ -507,10 +515,10 @@ if(!class_exists('M_Subscription')) {
 						<div class='levelinformation' style='float: right;'>
 							<p class='description'>
 								<strong><?php _e('Mode details','membership'); ?></strong><br/>
-								<?php _e('<strong>Finite</strong> - user remains at this level for a set period of time before ending');?><br/><br/>
-								<?php _e('<strong>Indefinite</strong> - user remains at this level for ever.');?><br/><br/>
-								<?php _e('<strong>Serial</strong> - user remains at this level for a set period of time and is then renewed at the same level');?><br/><br/>
-								<?php _e('<strong>Note:</strong> - depending on the payment gateway used, changing the price will not alter subscriptions charged to existing members.');?>
+								<?php _e('<strong>Finite</strong> - user remains at this level for a set period of time before ending','membership');?><br/><br/>
+								<?php _e('<strong>Indefinite</strong> - user remains at this level for ever.','membership');?><br/><br/>
+								<?php _e('<strong>Serial</strong> - user remains at this level for a set period of time and is then renewed at the same level','membership');?><br/><br/>
+								<?php _e('<strong>Note:</strong> - depending on the payment gateway used, changing the price will not alter subscriptions charged to existing members.','membership');?>
 							</p>
 						</div>
 					</div>
@@ -527,6 +535,8 @@ if(!class_exists('M_Subscription')) {
 
 			$this->levels = $this->get_levels();
 
+			$afterserial = false;
+
 			if(!empty($this->levels)) {
 				$count = 1;
 				foreach($this->levels as $key => $level) {
@@ -535,22 +545,22 @@ if(!class_exists('M_Subscription')) {
 					$this->levelorder[] = $levelid;
 
 					?>
-					<li class='sortable-levels' id="<?php echo $levelid; ?>" >
+					<li class='sortable-levels <?php echo ($afterserial) ? 'afterserial' : ''; ?>' id="<?php echo $levelid; ?>" >
 						<div class='joiningline'>&nbsp;</div>
 						<div class="sub-operation" style="display: block;">
 							<h2 class="sidebar-name"><?php echo esc_html($level->level_title); ?><span><a href='#remove' class='removelink' title='<?php _e("Remove this level from the subscription.",'membership'); ?>'><?php _e('Remove','membership'); ?></a></span></h2>
 							<div class="inner-operation">
 								<div class='levelfields' style='float: left;'>
 								<label for='levelmode[<?php echo $levelid; ?>]'><?php _e('Mode : ','membership'); ?></label>
-								<select name='levelmode[<?php echo $levelid; ?>]'>
-									<!-- <option value='trial' <?php if($level->sub_type == 'trial') echo "selected='selected'"; ?>>Trial</option> -->
-									<option value='finite' <?php if($level->sub_type == 'finite') echo "selected='selected'"; ?>>Finite</option>
-									<option value='indefinite' <?php if($level->sub_type == 'indefinite') echo "selected='selected'"; ?>>Indefinite</option>
-									<option value='serial' <?php if($level->sub_type == 'serial') echo "selected='selected'"; ?>>Serial</option>
-									<!-- <option value='sequential' <?php if($level->sub_type == 'sequential') echo "selected='selected'"; ?>>Sequential</option> -->
+								<select name='levelmode[<?php echo $levelid; ?>]' class='sublevelmode'>
+									<!-- <option value='trial' <?php if($level->sub_type == 'trial') echo "selected='selected'"; ?>><?php _e('Trial','membership'); ?></option> -->
+									<option value='finite' <?php if($level->sub_type == 'finite') echo "selected='selected'"; ?>><?php _e('Finite','membership'); ?></option>
+									<option value='indefinite' <?php if($level->sub_type == 'indefinite') echo "selected='selected'"; ?>><?php _e('Indefinite','membership'); ?></option>
+									<option value='serial' <?php if($level->sub_type == 'serial') echo "selected='selected'"; ?>><?php _e('Serial','membership'); ?></option>
+									<!-- <option value='sequential' <?php if($level->sub_type == 'sequential') echo "selected='selected'"; ?>><?php _e('Sequential','membership'); ?></option> -->
 								</select>
 								<label for='levelperiod[<?php echo $levelid; ?>]'><?php _e('Period : ','membership'); ?></label>
-								<select name='levelperiod[<?php echo $levelid; ?>]'>
+								<select name='levelperiod[<?php echo $levelid; ?>]' class='sublevelperiod'>
 									<?php
 										for($n = 1; $n <= 365; $n++) {
 											?>
@@ -559,7 +569,7 @@ if(!class_exists('M_Subscription')) {
 										}
 									?>
 								</select>&nbsp;
-								<select name="levelperiodunit[<?php echo $levelid; ?>]">
+								<select name="levelperiodunit[<?php echo $levelid; ?>]" class='sublevelperiodunit'>
 									<option value='d' <?php if($level->level_period_unit == 'd') echo "selected='selected'"; ?>><?php _e('day(s)','membership'); ?></option>
 									<option value='w' <?php if($level->level_period_unit == 'w') echo "selected='selected'"; ?>><?php _e('week(s)','membership'); ?></option>
 									<option value='m' <?php if($level->level_period_unit == 'm') echo "selected='selected'"; ?>><?php _e('month(s)','membership'); ?></option>
@@ -567,6 +577,8 @@ if(!class_exists('M_Subscription')) {
 								</select>
 
 								<label for='levelprice[<?php echo $levelid; ?>]'><?php _e('Price : ','membership'); ?></label>
+								<input type='text' name='levelprice[<?php echo $levelid; ?>]' value='<?php echo number_format($level->level_price, 2, '.', ''); ?>' class='narrow sublevelprice' />
+								<?php /* ?>
 								<select name='levelprice[<?php echo $levelid; ?>]'>
 									<option value=''></option>
 									<?php
@@ -576,7 +588,7 @@ if(!class_exists('M_Subscription')) {
 											<?php
 										}
 									?>
-								</select>&nbsp;
+								</select><?php */ ?>&nbsp;
 								<?php
 									if(!empty($M_options['paymentcurrency'])) {
 										echo esc_html($M_options['paymentcurrency']);
@@ -589,16 +601,22 @@ if(!class_exists('M_Subscription')) {
 								<div class='levelinformation' style='float: right;'>
 									<p class='description'>
 										<strong><?php _e('Mode details','membership'); ?></strong><br/>
-										<?php _e('<strong>Finite</strong> - user remains at this level for a set period of time before ending');?><br/><br/>
-										<?php _e('<strong>Indefinite</strong> - user remains at this level for ever.');?><br/><br/>
-										<?php _e('<strong>Serial</strong> - user remains at this level for a set period of time and is then renewed at the same level');?><br/><br/>
-										<?php _e('<strong>Note:</strong> - depending on the payment gateway used, changing the price will not alter subscriptions charged to existing members.');?>
+										<?php _e('<strong>Finite</strong> - user remains at this level for a set period of time before ending','membership');?><br/><br/>
+										<?php _e('<strong>Indefinite</strong> - user remains at this level for ever.','membership');?><br/><br/>
+										<?php _e('<strong>Serial</strong> - user remains at this level for a set period of time and is then renewed at the same level','membership');?><br/><br/>
+										<?php _e('<strong>Note:</strong> - depending on the payment gateway used, changing the price will not alter subscriptions charged to existing members.','membership');?>
 									</p>
 								</div>
 							</div>
 						</div>
 					</li>
 					<?php
+
+					// Set the afterserial to true
+					if($level->sub_type == 'serial' || $level->sub_type == 'indefinite') {
+						$afterserial = true;
+					}
+
 				}
 			}
 

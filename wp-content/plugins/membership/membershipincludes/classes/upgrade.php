@@ -6,25 +6,28 @@ function M_Upgrade($from = false) {
 
 		case 1:
 		case 2:		M_Alterfor2();
-					break;
 
 		case 3:		M_Alterfor3();
-					break;
 
 		case 4:
 		case 5:		M_Alterfor4();
-					break;
 
-		case 6:		M_Alterfor4();
-					M_Alterfor5();
-					break;
+		case 6:		M_Alterfor5();
 
-		case 7:		M_Alterfor4();
-					M_Alterfor5();
-					M_Alterfor6();
-					break;
+		case 7:		M_Alterfor6();
 
-		case 8:		break;
+		case 8:
+		case 9:
+					M_Alterfor10();
+
+		case 10:	M_Alterfor11();
+
+		case 11:	M_Alterfor12();
+
+		case 12:
+		case 13:	M_Alterfor14();
+
+					break;
 
 		case false:	M_Createtables();
 					break;
@@ -32,6 +35,56 @@ function M_Upgrade($from = false) {
 		default:	M_Createtables();
 					break;
 	}
+
+}
+
+function M_Alterfor14() {
+	global $wpdb;
+
+	$sql = "ALTER TABLE " . membership_db_prefix($wpdb, 'coupons') . " ADD `coupon_apply_to` VARCHAR(20)  NULL  DEFAULT NULL  AFTER `coupon_used`;";
+
+	$wpdb->query( $sql );
+
+}
+
+function M_Alterfor12() {
+	global $wpdb;
+
+	$sql = "CREATE TABLE IF NOT EXISTS `" . membership_db_prefix($wpdb, 'coupons') . "` (
+	  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	  `site_id` bigint(20) DEFAULT '0',
+	  `couponcode` varchar(250) DEFAULT NULL,
+	  `discount` decimal(11,2) DEFAULT '0.00',
+	  `discount_type` varchar(5) DEFAULT NULL,
+	  `discount_currency` varchar(5) DEFAULT NULL,
+	  `coupon_startdate` datetime DEFAULT NULL,
+	  `coupon_enddate` datetime DEFAULT NULL,
+	  `coupon_sub_id` bigint(20) DEFAULT '0',
+	  `coupon_uses` int(11) DEFAULT '0',
+	  `coupon_used` int(11) DEFAULT '0',
+	  `coupon_apply_to` varchar(20) DEFAULT NULL,
+	  PRIMARY KEY (`id`),
+	  KEY `couponcode` (`couponcode`)
+	)";
+
+	$wpdb->query( $sql );
+
+}
+
+function M_Alterfor11() {
+	global $wpdb;
+
+	$sql = "ALTER TABLE " . membership_db_prefix($wpdb, 'subscriptions') . " ADD `sub_pricetext` VARCHAR(200)  NULL  DEFAULT NULL  AFTER `sub_description`;";
+
+	$wpdb->query( $sql );
+}
+
+function M_Alterfor10() {
+	global $wpdb;
+
+	$sql = "ALTER TABLE " . membership_db_prefix($wpdb, 'subscriptions_levels') . " CHANGE `level_price` `level_price` decimal(11,2) NULL DEFAULT '0.00';";
+
+	$wpdb->query( $sql );
 
 }
 
@@ -229,6 +282,7 @@ function M_Createtables() {
 	  `sub_public` int(11) default '0',
 	  `sub_count` bigint(20) default '0',
 	  `sub_description` text,
+	  `sub_pricetext` varchar(200) DEFAULT NULL,
 	  PRIMARY KEY  (`id`)
 	);";
 
@@ -239,13 +293,13 @@ function M_Createtables() {
 		`level_id` bigint(20) default NULL,
 		`level_period` int(11) default NULL,
 		`sub_type` varchar(20) default NULL,
-		`level_price` int(11) default '0',
+		`level_price` decimal(11,2) default '0.00',
 		`level_currency` varchar(5) default NULL,
 		`level_order` bigint(20) default '0',
 		`level_period_unit` varchar(1) default 'd',
 		KEY `sub_id` (`sub_id`),
-	 	KEY `level_id` (`level_id`)
-	);";
+		KEY `level_id` (`level_id`)
+		);";
 
 	$wpdb->query($sql);
 
@@ -357,6 +411,25 @@ function M_Createtables() {
 
 	$wpdb->query($sql);
 
+	$sql = "CREATE TABLE IF NOT EXISTS `" . membership_db_prefix($wpdb, 'coupons') . "` (
+	  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	  `site_id` bigint(20) DEFAULT '0',
+	  `couponcode` varchar(250) DEFAULT NULL,
+	  `discount` decimal(11,2) DEFAULT '0.00',
+	  `discount_type` varchar(5) DEFAULT NULL,
+	  `discount_currency` varchar(5) DEFAULT NULL,
+	  `coupon_startdate` datetime DEFAULT NULL,
+	  `coupon_enddate` datetime DEFAULT NULL,
+	  `coupon_sub_id` bigint(20) DEFAULT '0',
+	  `coupon_uses` int(11) DEFAULT '0',
+	  `coupon_used` int(11) DEFAULT '0',
+	  `coupon_apply_to` varchar(20) DEFAULT NULL,
+	  PRIMARY KEY (`id`),
+	  KEY `couponcode` (`couponcode`)
+	)";
+
+	$wpdb->query( $sql );
+
 	do_action( 'membership_create_new_tables' );
 }
 
@@ -426,13 +499,13 @@ function M_Create_single_table( $name ) {
 						`level_id` bigint(20) default NULL,
 						`level_period` int(11) default NULL,
 						`sub_type` varchar(20) default NULL,
-						`level_price` int(11) default '0',
+						`level_price` decimal(11,2) default '0.00',
 						`level_currency` varchar(5) default NULL,
 						`level_order` bigint(20) default '0',
 						`level_period_unit` varchar(1) default 'd',
 						KEY `sub_id` (`sub_id`),
-					 	KEY `level_id` (`level_id`)
-					);";
+						KEY `level_id` (`level_id`)
+						);";
 					break;
 
 		case membership_db_prefix($wpdb, 'subscription_transaction'):
@@ -481,6 +554,7 @@ function M_Create_single_table( $name ) {
 					  `periodstamp` bigint(20) default '0',
 					  PRIMARY KEY  (`id`)
 					);";
+					break;
 
 		case membership_db_prefix($wpdb, 'pings'):
 					$sql = "CREATE TABLE IF NOT EXISTS `" . membership_db_prefix($wpdb, 'pings') . "` (
@@ -542,6 +616,24 @@ function M_Create_single_table( $name ) {
 					);";
 					break;
 
+		case membership_db_prefix($wpdb, 'coupons'):
+					$sql = "CREATE TABLE IF NOT EXISTS `" . membership_db_prefix($wpdb, 'coupons') . "` (
+					  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+					  `site_id` bigint(20) DEFAULT '0',
+					  `couponcode` varchar(250) DEFAULT NULL,
+					  `discount` decimal(11,2) DEFAULT '0.00',
+					  `discount_type` varchar(5) DEFAULT NULL,
+					  `discount_currency` varchar(5) DEFAULT NULL,
+					  `coupon_startdate` datetime DEFAULT NULL,
+					  `coupon_enddate` datetime DEFAULT NULL,
+					  `coupon_sub_id` bigint(20) DEFAULT '0',
+					  `coupon_uses` int(11) DEFAULT '0',
+					  `coupon_used` int(11) DEFAULT '0',
+					  `coupon_apply_to` varchar(20) DEFAULT NULL,
+					  PRIMARY KEY (`id`),
+					  KEY `couponcode` (`couponcode`)
+					)";
+					break;
 
 	}
 
@@ -704,6 +796,7 @@ function M_build_database_structure() {
 	$jd = 'date';
 	$d = 'datetime';
 	$ts = 'timestamp';
+	$dc = 'decimal(11,2)';
 
 	$structure = array( membership_db_prefix($wpdb, 'membership_levels') => array(	'id'	=>			$bi,
 																					'level_title'	=>	$v250,
@@ -732,13 +825,14 @@ function M_build_database_structure() {
 																					'sub_active'	=>	$i,
 																					'sub_public'	=>	$i,
 																					'sub_count'		=>	$bi,
-																					'sub_description'	=>	$t
+																					'sub_description'	=>	$t,
+																					'sub_pricetext'	=> $v200
 																					),
 						membership_db_prefix($wpdb, 'subscriptions_levels')	=>	array(	'sub_id'	=>	$bi,
 																						'level_id'	=>	$bi,
 																						'level_period'	=>	$i,
 																						'sub_type'	=>	$v20,
-																						'level_price'	=>	$i,
+																						'level_price'	=>	$dc,
 																						'level_currency'	=>	$v5,
 																						'level_order'	=>	$bi,
 																						'level_period_unit'	=>	$v1
@@ -804,6 +898,19 @@ function M_build_database_structure() {
 																					'level_order'	=>	$i,
 																					'paymentmade'	=>	$d,
 																					'paymentexpires'	=>	$d
+																			),
+						membership_db_prefix($wpdb, 'coupons') => array(	'id'	=>	$biu,
+																			'site_id'	=> $bi,
+																			'couponcode'	=> $v250,
+																			'discount'	=> $dc,
+																			'discount_type'	=> $v5,
+																			'discount_currency'	=> $v5,
+																			'coupon_startdate'	=>	$d,
+																			'coupon_enddate'	=> $d,
+																			'coupon_sub_id'	=> $bi,
+																			'coupon_uses'	=> $i,
+																			'coupon_used'	=> $i,
+																			'coupon_apply_to' => $v20
 																			)
 						);
 

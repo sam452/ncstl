@@ -2,28 +2,18 @@
  * Update datetime picker element
  * Used for static & dynamic added elements (when clone)
  */
-function rwmb_update_time_picker()
+jQuery( document ).ready( function( $ )
 {
-	var $ = jQuery;
-
-	$( '.rwmb-time' ).each( function()
+	$( ':input.rwmb-time' ).each( rwmb_update_time_picker );
+	$( '.rwmb-input' ).on( 'clone', ':input.rwmb-time', rwmb_update_time_picker );
+	
+	function rwmb_update_time_picker()
 	{
 		var $this = $( this ),
-			format = $this.attr( 'rel' ),
-			show_amppm = /t/i.test(format),
-			show_second = /:s/.test(format),
-			show_millisec = /:l/.test(format);
-
-		$this.removeClass('hasDatepicker').attr('id', '').timepicker( {
-			showSecond  : show_second,
-			showMillisec: show_millisec,
-			timeFormat  : format,
-			ampm        : show_amppm,
-		} );
-	} );
-}
-
-jQuery( document ).ready( function($)
-{
-	rwmb_update_time_picker();
+			options = $this.data( 'options' );
+	
+		$this.siblings( '.ui-datepicker-append' ).remove();         // Remove appended text
+		$this.removeClass( 'hasDatepicker' ).attr( 'id', '' ).timepicker( options );
+	
+	}
 } );

@@ -1,50 +1,71 @@
 <?php
+	global $M_options;
 ?>
-<div id="reg-form">
-	<div class="formleft">
+<div id='membership-wrapper'>
 
-		<h2><?php _e('Step 2. Select a subscription','membership'); ?></h2>
-		<p>
-			<?php _e('Please select a subscription from the options below.','membership'); ?>
-		</p>
+	<fieldset>
+		<legend><?php _e( 'Select a Subscription', 'membership' ) ?></legend>
+		<p class="help-block"><?php _e('We have the following subscriptions available for our site. To join, simply click on the <strong>Sign Up</strong> button and then complete the registration details.','membership'); ?></p>
+
+	<form class="form-membership" action="<?php echo get_permalink(); ?>" method="post">
+		<div class="priceboxes">
 		<?php
-			do_action( 'membership_subscription_form_before_subscriptions', $user_id );
+			do_action( 'membership_subscription_form_before_subscriptions' );
 
 			$subs = $this->get_subscriptions();
 
-			do_action( 'membership_subscription_form_before_paid_subscriptions', $user_id );
-
 			$subs = apply_filters( 'membership_override_subscriptions', $subs );
+
 			foreach((array) $subs as $key => $sub) {
 
 				$subscription = new M_Subscription($sub->id);
 
 				?>
-				<div class="subscription">
-					<div class="description">
-						<h3><?php echo $subscription->sub_name(); ?></h3>
-						<p><?php echo $subscription->sub_description(); ?></p>
-					</div>
+				<div class="pricebox subscriptionbox" id='subscriptionbox-<?php echo $subscription->id; ?>'>
+					<div class="topbar"><span class='title'><?php echo $subscription->sub_name(); ?></span></div>
+					<div class="pricedetails"><?php echo $subscription->sub_description(); ?></div>
+					<div class="bottombar"><span class='price'><?php echo $subscription->sub_pricetext(); ?></span>
+					<?php
+						$pricing = $subscription->get_pricingarray();
 
-				<?php
-					$pricing = $subscription->get_pricingarray();
+						if($pricing) {
+							?>
+							<span class='link'>
+								<?php
 
-					if($pricing) {
+									if(isset($M_options['formtype']) && $M_options['formtype'] == 'new') {
+										// pop up form
+										$link = admin_url( 'admin-ajax.php' );
+										$link .= '?action=buynow&amp;subscription=' . (int) $sub->id;
+										$class = 'popover';
+									} else {
+										// original form
+										$link = '?action=registeruser&amp;subscription=' . (int) $sub->id;
+										$class = '';
+									}
+
+									if(empty($linktext)) {
+										$linktext = apply_filters('membership_subscription_signup_text', __('Sign Up', 'membership'));
+									}
+
+									$html = "<a href='" . $link . "' class='button " . $class . " " . apply_filters('membership_subscription_button_color', 'blue') . "'>" . $linktext . "</a>";
+									echo $html;
+								?>
+							</span>
+							<?php
+						}
 						?>
-						<div class='priceforms'>
-							<?php do_action('membership_purchase_button', $subscription, $pricing, $user_id); ?>
-						</div>
-						<?php
-					}
-				?>
+					</div>
 				</div>
-				<?php
-			}
 
-			do_action( 'membership_subscription_form_after_paid_subscriptions', $user_id );
-			do_action( 'membership_subscription_form_after_subscriptions', $user_id );
+
+			<?php
+			}
+			do_action( 'membership_subscription_form_after_subscriptions' );
 			?>
-		</div>
+			</div> <!-- price boxes -->
+		</form>
+	</fieldset>
 </div>
 <?php
 ?>

@@ -66,6 +66,22 @@ if(!class_exists('M_Level')) {
 
 		}
 
+		function get_shortcode() {
+
+			if(empty($this->level)) {
+				$level = $this->get();
+
+				if($level) {
+					return sanitize_title_with_dashes('level-' . $level->level_title);
+				} else {
+					return false;
+				}
+			} else {
+				return sanitize_title_with_dashes('level-' . $level->level->level_title);
+			}
+
+		}
+
 		// Gets
 
 		function get() {
@@ -94,25 +110,20 @@ if(!class_exists('M_Level')) {
 
 		function delete($forced = false) {
 
-			if($this->count() == 0 || $forced) {
-				$sql = $this->db->prepare( "DELETE FROM {$this->membership_levels} WHERE id = %d", $this->id);
+			$sql = $this->db->prepare( "DELETE FROM {$this->membership_levels} WHERE id = %d", $this->id);
 
-				$sql2 = $this->db->prepare( "DELETE FROM {$this->membership_rules} WHERE level_id = %d", $this->id);
+			$sql2 = $this->db->prepare( "DELETE FROM {$this->membership_rules} WHERE level_id = %d", $this->id);
 
-				$sql3 = $this->db->prepare( "DELETE FROM {$this->subscriptions_levels} WHERE level_id = %d", $this->id);
+			$sql3 = $this->db->prepare( "DELETE FROM {$this->subscriptions_levels} WHERE level_id = %d", $this->id);
 
-				if($this->db->query($sql)) {
+			if($this->db->query($sql)) {
 
-					$this->db->query($sql2);
-					$this->db->query($sql3);
+				$this->db->query($sql2);
+				$this->db->query($sql3);
 
-					$this->dirty = true;
+				$this->dirty = true;
 
-					return true;
-
-				} else {
-					return false;
-				}
+				return true;
 
 			} else {
 				return false;
@@ -143,6 +154,9 @@ if(!class_exists('M_Level')) {
 								$ruleval = maybe_serialize($_POST[$rule]);
 								// write it to the database
 								$this->db->insert($this->membership_rules, array("level_id" => $this->id, "rule_ive" => 'positive', "rule_area" => $rule, "rule_value" => $ruleval, "rule_order" => $count++));
+								// Hit an action - two methods of hooking
+								do_action('membership_update_positive_rule', $rule, $_POST, $this->id);
+								do_action('membership_update_positive_rule_' . $rule, $_POST, $this->id);
 							}
 						}
 
@@ -159,6 +173,9 @@ if(!class_exists('M_Level')) {
 								$ruleval = maybe_serialize($_POST[$rule]);
 								// write it to the database
 								$this->db->insert($this->membership_rules, array("level_id" => $this->id, "rule_ive" => 'negative', "rule_area" => $rule, "rule_value" => $ruleval, "rule_order" => $count++));
+								// Hit an action - two methods of hooking
+								do_action('membership_update_negative_rule', $rule, $_POST, $this->id);
+								do_action('membership_update_negative_rule_' . $rule, $_POST, $this->id);
 							}
 						}
 					}
@@ -194,6 +211,9 @@ if(!class_exists('M_Level')) {
 								$ruleval = maybe_serialize($_POST[$rule]);
 								// write it to the database
 								$this->db->insert($this->membership_rules, array("level_id" => $this->id, "rule_ive" => 'positive', "rule_area" => $rule, "rule_value" => $ruleval, "rule_order" => $count++));
+								// Hit an action - two methods of hooking
+								do_action('membership_add_positive_rule', $rule, $_POST, $this->id);
+								do_action('membership_add_positive_rule_' . $rule, $_POST, $this->id);
 							}
 						}
 
@@ -210,6 +230,9 @@ if(!class_exists('M_Level')) {
 								$ruleval = maybe_serialize($_POST[$rule]);
 								// write it to the database
 								$this->db->insert($this->membership_rules, array("level_id" => $this->id, "rule_ive" => 'negative', "rule_area" => $rule, "rule_value" => $ruleval, "rule_order" => $count++));
+								// Hit an action - two methods of hooking
+								do_action('membership_add_negative_rule', $rule, $_POST, $this->id);
+								do_action('membership_add_negative_rule_' . $rule, $_POST, $this->id);
 							}
 						}
 					}
@@ -227,13 +250,9 @@ if(!class_exists('M_Level')) {
 
 			$this->dirty = true;
 
-			if($this->count() == 0 || $forced) {
-				$sql = $this->db->prepare( "UPDATE {$this->membership_levels} SET level_active = NOT level_active WHERE id = %d", $this->id);
+			$sql = $this->db->prepare( "UPDATE {$this->membership_levels} SET level_active = NOT level_active WHERE id = %d", $this->id);
 
-				return $this->db->query($sql);
-			} else {
-				return false;
-			}
+			return $this->db->query($sql);
 
 		}
 		// UI functions
@@ -256,7 +275,7 @@ if(!class_exists('M_Level')) {
 				$key = 0;
 				foreach( (array) $positive as $key => $rule) {
 					if(isset($M_Rules[$rule->rule_area]) && class_exists($M_Rules[$rule->rule_area])) {
-						$this->positiverules[$key] = new $M_Rules[$rule->rule_area];
+						$this->positiverules[$key] = new $M_Rules[$rule->rule_area]( $this->id );
 
 						if( in_array($this->positiverules[$key]->rulearea, $loadtype) ) {
 							$this->positiverules[$key]->on_positive(maybe_unserialize($rule->rule_value));
@@ -273,7 +292,7 @@ if(!class_exists('M_Level')) {
 				$key = 0;
 				foreach( (array) $negative as $key => $rule) {
 					if(isset($M_Rules[$rule->rule_area]) && class_exists($M_Rules[$rule->rule_area])) {
-						$this->negativerules[$key] = new $M_Rules[$rule->rule_area];
+						$this->negativerules[$key] = new $M_Rules[$rule->rule_area]( $this->id );
 
 						if( in_array($this->negativerules[$key]->rulearea, $loadtype) ) {
 							$this->negativerules[$key]->on_negative(maybe_unserialize($rule->rule_value));

@@ -3,15 +3,14 @@
 Plugin Name: Breadcrumb NavXT
 Plugin URI: http://mtekk.us/code/breadcrumb-navxt/
 Description: Adds a breadcrumb navigation showing the visitor&#39;s path to their current location. For details on how to use this plugin visit <a href="http://mtekk.us/code/breadcrumb-navxt/">Breadcrumb NavXT</a>. 
-Version: 4.1.0
+Version: 4.4.0
 Author: John Havlik
 Author URI: http://mtekk.us/
 License: GPL2
 TextDomain: breadcrumb-navxt
 DomainPath: /languages/
-
 */
-/*  Copyright 2007-2012  John Havlik  (email : mtekkmonkey@gmail.com)
+/*  Copyright 2007-2013  John Havlik  (email : mtekkmonkey@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +26,7 @@ DomainPath: /languages/
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+require_once(dirname(__FILE__) . '/includes/block_direct_access.php');
 //Do a PHP version check, require 5.2 or newer
 if(version_compare(phpversion(), '5.2.0', '<'))
 {
@@ -61,7 +61,7 @@ if(!class_exists('mtekk_adminKit'))
  */
 class bcn_admin extends mtekk_adminKit
 {
-	protected $version = '4.1.0';
+	protected $version = '4.4.0';
 	protected $full_name = 'Breadcrumb NavXT Settings';
 	protected $short_name = 'Breadcrumb NavXT';
 	protected $access_level = 'manage_options';
@@ -79,14 +79,13 @@ class bcn_admin extends mtekk_adminKit
 		$this->breadcrumb_trail = $breadcrumb_trail;
 		//Grab defaults from the breadcrumb_trail object
 		$this->opt = $this->breadcrumb_trail->opt;
-		//We need to add in the defaults for CPTs and custom taxonomies after all other plugins are loaded
-		add_action('wp_loaded', array($this, 'wp_loaded'));
 		//We set the plugin basename here, could manually set it, but this is for demonstration purposes
 		//$this->plugin_basename = plugin_basename(__FILE__);
 		//Register the WordPress 2.8 Widget
 		add_action('widgets_init', create_function('', 'return register_widget("'. $this->unique_prefix . '_widget");'));
 		//We're going to make sure we load the parent's constructor
 		parent::__construct();
+		add_action('init', array($this, 'wp_init'));
 	}
 	/**
 	 * admin initialization callback function
@@ -100,12 +99,108 @@ class bcn_admin extends mtekk_adminKit
 	{
 		//We're going to make sure we run the parent's version of this function as well
 		parent::init();
+		//We want to run late for using our breadcrumbs
+		add_filter('tha_breadcrumb_navigation', array($this, 'tha_compat'), 99);
+	}
+	function wp_init()
+	{
+		add_filter('bcn_allowed_html', array($this, 'allowed_html'), 1, 1);
+	}
+	function allowed_html($tags)
+	{
+		$allowed_html = array(
+					'a' => array(
+						'href' => true,
+						'title' => true,
+						'class' => true,
+						'id' => true,
+						'media' => true,
+						'dir' => true,
+						'relList' => true,
+						'rel' => true,
+						'aria-hidden' => true,
+						'data-icon' => true,
+						'itemref' => true,
+						'itemid' => true,
+						'itemprop' => true,
+						'itemscope' => true,
+						'itemtype' => true
+					),
+					'img' => array(
+						'alt' => true,
+						'align' => true,
+						'height' => true,
+						'width' => true,
+						'src' => true,
+						'id' => true,
+						'class' => true,
+						'aria-hidden' => true,
+						'data-icon' => true,
+						'itemref' => true,
+						'itemid' => true,
+						'itemprop' => true,
+						'itemscope' => true,
+						'itemtype' => true
+					),
+					'span' => array(
+						'title' => true,
+						'class' => true,
+						'id' => true,
+						'dir' => true,
+						'align' => true,
+						'lang' => true,
+						'xml:lang' => true,
+						'aria-hidden' => true,
+						'data-icon' => true,
+						'itemref' => true,
+						'itemid' => true,
+						'itemprop' => true,
+						'itemscope' => true,
+						'itemtype' => true
+					),
+					'h1' => array(
+						'title' => true,
+						'class' => true,
+						'id' => true,
+						'dir' => true,
+						'align' => true,
+						'lang' => true,
+						'xml:lang' => true,
+						'aria-hidden' => true,
+						'data-icon' => true,
+						'itemref' => true,
+						'itemid' => true,
+						'itemprop' => true,
+						'itemscope' => true,
+						'itemtype' => true
+					),
+					'h2' => array(
+						'title' => true,
+						'class' => true,
+						'id' => true,
+						'dir' => true,
+						'align' => true,
+						'lang' => true,
+						'xml:lang' => true,
+						'aria-hidden' => true,
+						'data-icon' => true,
+						'itemref' => true,
+						'itemid' => true,
+						'itemprop' => true,
+						'itemscope' => true,
+						'itemtype' => true
+					)
+				);
+		return $allowed_html; //$this->array_merge_recursive($tags, $allowed_html);
 	}
 	function wp_loaded()
 	{
 		//First make sure our defaults are safe
 		$this->find_posttypes($this->opt);
 		$this->find_taxonomies($this->opt);
+		//Let others hook into our settings
+		$this->opt = apply_filters($this->unique_prefix . '_settings_init', $this->opt);
+		parent::wp_loaded();
 	}
 	/**
 	 * Makes sure the current user can manage options to proceed
@@ -128,7 +223,7 @@ class bcn_admin extends mtekk_adminKit
 	{
 		global $wp_post_types;
 		//If our version is not the same as in the db, time to update
-		if($version !== $this->version)
+		if(version_compare($version, $this->version, '<'))
 		{
 			//Upgrading to 3.8.1
 			if(version_compare($version, '3.8.1', '<'))
@@ -148,7 +243,7 @@ class bcn_admin extends mtekk_adminKit
 						//Handle all of our boolean options first, they're real easy, just add a 'b'
 						if(strpos($option, 'display') > 0 || $option == 'current_item_linked')
 						{
-							$this->breadcrumb_trail->opt['b'.$option] = $value;
+							$this->breadcrumb_trail->opt['b' . $option] = $value;
 						}
 						//Handle migration of anchor templates to the templates
 						else if(strpos($option, 'anchor') > 0)
@@ -190,6 +285,20 @@ class bcn_admin extends mtekk_adminKit
 				if(isset($opts['Hcurrent_item_template']))
 				{
 					unset($opts['Hcurrent_item_template']);
+				}
+			}
+			//Upgrading to 4.3.0
+			if(version_compare($version, '4.3.0', '<'))
+			{
+				//Removed home_title
+				if(isset($opts['Shome_title']))
+				{
+					unset($opts['Shome_title']);
+				}
+				//Removed mainsite_title
+				if(isset($opts['Smainsite_title']))
+				{
+					unset($opts['Smainsite_title']);
 				}
 			}
 			//Add custom post types
@@ -308,7 +417,7 @@ class bcn_admin extends mtekk_adminKit
 		//Let's call the parent version of the page, will handle our setting stuff
 		parent::admin_page();
 		?>
-		<div class="wrap"><h2><?php _e('Breadcrumb NavXT Settings', 'breadcrumb-navxt'); ?></h2>
+		<div class="wrap"><div id="icon-options-general" class="icon32"></div><h2><?php _e('Breadcrumb NavXT Settings', 'breadcrumb-navxt'); ?></h2>
 		<?php
 		//We exit after the version check if there is an action the user needs to take before saving settings
 		if(!$this->version_check(get_option($this->unique_prefix . '_version')))
@@ -316,131 +425,144 @@ class bcn_admin extends mtekk_adminKit
 			return;
 		}
 		?>
-		<form action="options-general.php?page=breadcrumb-navxt" method="post" id="bcn_admin-options">
+		<form action="<?php echo $this->admin_url(); ?>" method="post" id="bcn_admin-options">
 			<?php settings_fields('bcn_options');?>
 			<div id="hasadmintabs">
 			<fieldset id="general" class="bcn_options">
+				<h3 class="tab-title" title="<?php _e('A collection of settings most likely to be modified are located under this tab.', 'breadcrumb-navxt');?>"><?php _e('General', 'breadcrumb-navxt'); ?></h3>
 				<h3><?php _e('General', 'breadcrumb-navxt'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(__('Breadcrumb Separator', 'breadcrumb-navxt'), 'hseparator', '32', false, __('Placed in between each breadcrumb.', 'breadcrumb-navxt'));
-						$this->input_text(__('Breadcrumb Max Title Length', 'breadcrumb-navxt'), 'amax_title_length', '10');
+						$this->input_text(__('Breadcrumb Separator', 'breadcrumb-navxt'), 'hseparator', 'regular-text', false, __('Placed in between each breadcrumb.', 'breadcrumb-navxt'));
 					?>
 					<tr valign="top">
 						<th scope="row">
-							<?php _e('Home Breadcrumb', 'breadcrumb-navxt'); ?>						
+							<?php _e('Title Length', 'breadcrumb-navxt'); ?>						
 						</th>
 						<td>
 							<label>
-								<input name="bcn_options[bhome_display]" type="checkbox" id="bhome_display" value="true" <?php checked(true, $this->opt['bhome_display']); ?> />
-								<?php _e('Place the home breadcrumb in the trail.', 'breadcrumb-navxt'); ?>				
+								<input name="bcn_options[blimit_title]" type="checkbox" id="blimit_title" value="true" <?php checked(true, $this->opt['blimit_title']); ?> />
+								<?php _e('Limit the length of the breadcrumb title.', 'breadcrumb-navxt'); ?>				
 							</label><br />
 							<ul>
 								<li>
-									<label for="Shome_title">
-										<?php _e('Home Title: ','breadcrumb-navxt');?>
-										<input type="text" name="bcn_options[Shome_title]" id="Shome_title" value="<?php echo esc_html($this->opt['Shome_title'], ENT_COMPAT, 'UTF-8'); ?>" size="20" />
+									<label for="amax_title_length">
+										<?php _e('Max Title Length: ','breadcrumb-navxt');?>
+										<input type="number" name="bcn_options[amax_title_length]" id="amax_title_length" min="1" step="1" value="<?php echo esc_html($this->opt['amax_title_length'], ENT_COMPAT, 'UTF-8'); ?>" class="small-text" />
 									</label>
 								</li>
 							</ul>							
 						</td>
 					</tr>
 					<?php
-						$this->input_text(__('Home Template', 'breadcrumb-navxt'), 'Hhome_template', '64', false, __('The template for the home breadcrumb.', 'breadcrumb-navxt'));
-						$this->input_text(__('Home Template (Unlinked)', 'breadcrumb-navxt'), 'Hhome_template_no_anchor', '64', false, __('The template for the home breadcrumb, used when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_check(__('Blog Breadcrumb', 'breadcrumb-navxt'), 'bblog_display', __('Place the blog breadcrumb in the trail.', 'breadcrumb-navxt'), (get_option('show_on_front') !== "page"));
-						$this->input_text(__('Blog Template', 'breadcrumb-navxt'), 'Hblog_template', '64', (get_option('show_on_front') !== "page"), __('The template for the blog breadcrumb, used only in static front page environments.', 'breadcrumb-navxt'));
-						$this->input_text(__('Blog Template (Unlinked)', 'breadcrumb-navxt'), 'Hblog_template_no_anchor', '64', (get_option('show_on_front') !== "page"), __('The template for the blog breadcrumb, used only in static front page environments and when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-					?>
-					<tr valign="top">
-						<th scope="row">
-							<?php _e('Main Site Breadcrumb', 'breadcrumb-navxt'); ?>						
-						</th>
-						<td>
-							<label>
-								<input name="bcn_options[bmainsite_display]" type="checkbox" id="bmainsite_display" <?php if(!is_multisite()){echo 'disabled="disabled" class="disabled"';}?> value="true" <?php checked(true, $this->opt['bmainsite_display']); ?> />
-								<?php _e('Place the main site home breadcrumb in the trail in an multisite setup.', 'breadcrumb-navxt'); ?>				
-							</label><br />
-							<ul>
-								<li>
-									<label for="Smainsite_title">
-										<?php _e('Main Site Home Title: ', 'breadcrumb-navxt');?>
-										<input type="text" name="bcn_options[Smainsite_title]" id="Smainsite_title" <?php if(!is_multisite()){echo 'disabled="disabled" class="disabled"';}?> value="<?php echo htmlentities($this->opt['Smainsite_title'], ENT_COMPAT, 'UTF-8'); ?>" size="20" />
-										<?php if(!is_multisite()){?><input type="hidden" name="bcn_options[Smainsite_title]" value="<?php echo htmlentities($this->opt['Smainsite_title'], ENT_COMPAT, 'UTF-8');?>" /><?php } ?>
-									</label>
-								</li>
-							</ul>							
-						</td>
-					</tr>
-					<?php
-						$this->input_text(__('Main Site Home Template', 'breadcrumb-navxt'), 'Hmainsite_template', '64', !is_multisite(), __('The template for the main site home breadcrumb, used only in multisite environments.', 'breadcrumb-navxt'));
-						$this->input_text(__('Main Site Home Template (Unlinked)', 'breadcrumb-navxt'), 'Hmainsite_template_no_anchor', '64', !is_multisite(), __('The template for the main site home breadcrumb, used only in multisite environments and when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						do_action($this->unique_prefix . '_settings_general');
 					?>
 				</table>
-			</fieldset>
-			<fieldset id="current" class="bcn_options">
 				<h3><?php _e('Current Item', 'breadcrumb-navxt'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_check(__('Link Current Item', 'breadcrumb-navxt'), 'bcurrent_item_linked', __('Yes'));
+						$this->input_check(__('Link Current Item', 'breadcrumb-navxt'), 'bcurrent_item_linked', __('Yes', 'breadcrumb-navxt'));
 						$this->input_check(__('Paged Breadcrumb', 'breadcrumb-navxt'), 'bpaged_display', __('Include the paged breadcrumb in the breadcrumb trail.', 'breadcrumb-navxt'), false, __('Indicates that the user is on a page other than the first on paginated posts/pages.', 'breadcrumb-navxt'));
-						$this->input_text(__('Paged Template', 'breadcrumb-navxt'), 'Hpaged_template', '64', false, __('The template for paged breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Paged Template', 'breadcrumb-navxt'), 'Hpaged_template', 'large-text', false, __('The template for paged breadcrumbs.', 'breadcrumb-navxt'));
+						do_action($this->unique_prefix . '_settings_current_item');
 					?>
 				</table>
-			</fieldset>
-			<fieldset id="single" class="bcn_options">
-				<h3><?php _e('Posts &amp; Pages', 'breadcrumb-navxt'); ?></h3>
+				<h3><?php _e('Home Breadcrumb', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php 
+						$this->input_check(__('Home Breadcrumb', 'breadcrumb-navxt'), 'bhome_display', __('Place the home breadcrumb in the trail.', 'breadcrumb-navxt'));
+						$this->input_text(__('Home Template', 'breadcrumb-navxt'), 'Hhome_template', 'large-text', false, __('The template for the home breadcrumb.', 'breadcrumb-navxt'));
+						$this->input_text(__('Home Template (Unlinked)', 'breadcrumb-navxt'), 'Hhome_template_no_anchor', 'large-text', false, __('The template for the home breadcrumb, used when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						do_action($this->unique_prefix . '_settings_home');
+					?>
+				</table>
+				<h3><?php _e('Blog Breadcrumb', 'breadcrumb-navxt'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(__('Post Template', 'breadcrumb-navxt'), 'Hpost_post_template', '64', false, __('The template for post breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Post Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_post_template_no_anchor', '64', false, __('The template for post breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_check(__('Post Taxonomy Display', 'breadcrumb-navxt'), 'bpost_post_taxonomy_display', __('Show the taxonomy leading to a post in the breadcrumb trail.', 'breadcrumb-navxt'));
+						$this->input_check(__('Blog Breadcrumb', 'breadcrumb-navxt'), 'bblog_display', __('Place the blog breadcrumb in the trail.', 'breadcrumb-navxt'), (get_option('show_on_front') !== "page"));
+						$this->input_text(__('Blog Template', 'breadcrumb-navxt'), 'Hblog_template', 'large-text', (get_option('show_on_front') !== "page"), __('The template for the blog breadcrumb, used only in static front page environments.', 'breadcrumb-navxt'));
+						$this->input_text(__('Blog Template (Unlinked)', 'breadcrumb-navxt'), 'Hblog_template_no_anchor', 'large-text', (get_option('show_on_front') !== "page"), __('The template for the blog breadcrumb, used only in static front page environments and when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						do_action($this->unique_prefix . '_settings_blog');
+					?>
+				</table>
+				<h3><?php _e('Mainsite Breadcrumb', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php
+						$this->input_check(__('Main Site Breadcrumb', 'breadcrumb-navxt'), 'bmainsite_display', __('Place the main site home breadcrumb in the trail in an multisite setup.', 'breadcrumb-navxt'), !is_multisite());
+						$this->input_text(__('Main Site Home Template', 'breadcrumb-navxt'), 'Hmainsite_template', 'large-text', !is_multisite(), __('The template for the main site home breadcrumb, used only in multisite environments.', 'breadcrumb-navxt'));
+						$this->input_text(__('Main Site Home Template (Unlinked)', 'breadcrumb-navxt'), 'Hmainsite_template_no_anchor', 'large-text', !is_multisite(), __('The template for the main site home breadcrumb, used only in multisite environments and when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						do_action($this->unique_prefix . '_settings_mainsite');
+					?>
+				</table>
+				<?php do_action($this->unique_prefix . '_after_settings_tab_general'); ?>
+			</fieldset>
+			<fieldset id="post" class="bcn_options">
+				<h3 class="tab-title" title="<?php _e('The settings for all post types (Posts, Pages, and Custom Post Types) are located under this tab.', 'breadcrumb-navxt');?>"><?php _e('Post Types', 'breadcrumb-navxt'); ?></h3>
+				<h3><?php _e('Posts', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php
+						$this->input_text(__('Post Template', 'breadcrumb-navxt'), 'Hpost_post_template', 'large-text', false, __('The template for post breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Post Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_post_template_no_anchor', 'large-text', false, __('The template for post breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_check(__('Post Hierarchy Display', 'breadcrumb-navxt'), 'bpost_post_taxonomy_display', __('Show the taxonomy leading to a post in the breadcrumb trail.', 'breadcrumb-navxt'));
 					?>
 					<tr valign="top">
 						<th scope="row">
-							<?php _e('Post Taxonomy', 'breadcrumb-navxt'); ?>
+							<?php _e('Post Hierarchy', 'breadcrumb-navxt'); ?>
 						</th>
 						<td>
 							<?php
 								$this->input_radio('Spost_post_taxonomy_type', 'category', __('Categories'));
 								$this->input_radio('Spost_post_taxonomy_type', 'date', __('Dates'));
 								$this->input_radio('Spost_post_taxonomy_type', 'post_tag', __('Tags'));
-								$this->input_radio('Spost_post_taxonomy_type', 'page', __('Pages'));
+								//We use the value 'page' but really, this will follow the parent post hierarchy
+								$this->input_radio('Spost_post_taxonomy_type', 'page', __('Post Parent'));
 								//Loop through all of the taxonomies in the array
 								foreach($wp_taxonomies as $taxonomy)
 								{
+									//Check for non-public taxonomies
+									if(!apply_filters('bcn_show_tax_private', $taxonomy->public, $taxonomy->name))
+									{
+										continue;
+									}
 									//We only want custom taxonomies
 									if(($taxonomy->object_type == 'post' || is_array($taxonomy->object_type) && in_array('post', $taxonomy->object_type)) && !$taxonomy->_builtin)
 									{
-										$this->input_radio('Spost_post_taxonomy_type', $taxonomy->name, mb_convert_case(__($taxonomy->label), MB_CASE_TITLE, 'UTF-8'));
+										$this->input_radio('Spost_post_taxonomy_type', $taxonomy->name, mb_convert_case($taxonomy->label, MB_CASE_TITLE, 'UTF-8'));
 									}
 								}
 							?>
-							<span class="setting-description"><?php _e('The taxonomy which the breadcrumb trail will show.', 'breadcrumb-navxt'); ?></span>
+							<p class="description"><?php _e('The hierarchy which the breadcrumb trail will show. Note that the "Post Parent" option may require an additional plugin to behave as expected since this is a non-hierarchical post type.', 'breadcrumb-navxt'); ?></p>
 						</td>
 					</tr>
+				</table>
+				<h3><?php _e('Pages', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
 					<?php
-						$this->input_text(__('Page Template', 'breadcrumb-navxt'), 'Hpost_page_template', '64', false, __('The template for page breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Page Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_page_template_no_anchor', '64', false, __('The template for page breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_text(__('Attachment Template', 'breadcrumb-navxt'), 'Hpost_attachment_template', '64', false, __('The template for attachment breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Attachment Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_attachment_template_no_anchor', '64', false, __('The template for attachment breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_text(__('Page Template', 'breadcrumb-navxt'), 'Hpost_page_template', 'large-text', false, __('The template for page breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Page Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_page_template_no_anchor', 'large-text', false, __('The template for page breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_text(__('Attachment Template', 'breadcrumb-navxt'), 'Hpost_attachment_template', 'large-text', false, __('The template for attachment breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Attachment Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_attachment_template_no_anchor', 'large-text', false, __('The template for attachment breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
 					?>
 				</table>
-			</fieldset>
 			<?php
 			//Loop through all of the post types in the array
 			foreach($wp_post_types as $post_type)
 			{
+				//Check for non-public CPTs
+				if(!apply_filters('bcn_show_cpt_private', $post_type->public, $post_type->name))
+				{
+					continue;
+				}
 				//We only want custom post types
 				if(!$post_type->_builtin)
 				{
+					$singular_name_lc = mb_strtolower($post_type->labels->singular_name, 'UTF-8');
 				?>
-			<fieldset id="post_<?php echo $post_type->name ?>" class="bcn_options">
 				<h3><?php echo $post_type->labels->singular_name; ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(sprintf(__('%s Template', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'Hpost_' . $post_type->name . '_template', '64', false, sprintf(__('The template for %s breadcrumbs.', 'breadcrumb-navxt'), strtolower(__($post_type->labels->singular_name))));
-						$this->input_text(sprintf(__('%s Template (Unlinked)', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'Hpost_' . $post_type->name . '_template_no_anchor', '64', false, sprintf(__('The template for %s breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'), strtolower(__($post_type->labels->singular_name))));
+						$this->input_text(sprintf(__('%s Template', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'Hpost_' . $post_type->name . '_template', 'large-text', false, sprintf(__('The template for %s breadcrumbs.', 'breadcrumb-navxt'), $singular_name_lc));
+						$this->input_text(sprintf(__('%s Template (Unlinked)', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'Hpost_' . $post_type->name . '_template_no_anchor', 'large-text', false, sprintf(__('The template for %s breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'), $singular_name_lc));
 						$optid = $this->get_valid_id('apost_' . $post_type->name . '_root');
 					?>
 					<tr valign="top">
@@ -452,20 +574,25 @@ class bcn_admin extends mtekk_adminKit
 						</td>
 					</tr>
 					<?php
-						$this->input_check(sprintf(__('%s Archive Display', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'bpost_' . $post_type->name . '_archive_display', sprintf(__('Show the breadcrumb for the %s post type archives in the breadcrumb trail.', 'breadcrumb-navxt'), strtolower(__($post_type->labels->singular_name))), !$post_type->has_archive);
-						$this->input_check(sprintf(__('%s Taxonomy Display', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'bpost_' . $post_type->name . '_taxonomy_display', sprintf(__('Show the taxonomy leading to a %s in the breadcrumb trail.', 'breadcrumb-navxt'), strtolower(__($post_type->labels->singular_name))));
+						$this->input_check(sprintf(__('%s Archive Display', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'bpost_' . $post_type->name . '_archive_display', sprintf(__('Show the breadcrumb for the %s post type archives in the breadcrumb trail.', 'breadcrumb-navxt'), $singular_name_lc), !$post_type->has_archive);
+						$this->input_check(sprintf(__('%s Hierarchy Display', 'breadcrumb-navxt'), $post_type->labels->singular_name), 'bpost_' . $post_type->name . '_taxonomy_display', sprintf(__('Show the taxonomy leading to a %s in the breadcrumb trail.', 'breadcrumb-navxt'), $singular_name_lc));
 					?>
 					<tr valign="top">
 						<th scope="row">
-							<?php printf(__('%s Taxonomy', 'breadcrumb-navxt'), $post_type->labels->singular_name); ?>
+							<?php printf(__('%s Hierarchy', 'breadcrumb-navxt'), $post_type->labels->singular_name); ?>
 						</th>
 						<td>
 							<?php
-								$this->input_radio('Spost_' . $post_type->name . '_taxonomy_type', 'date', __('Dates'));
-								$this->input_radio('Spost_' . $post_type->name . '_taxonomy_type', 'page', __('Pages'));
+								//We use the value 'page' but really, this will follow the parent post hierarchy
+								$this->input_radio('Spost_' . $post_type->name . '_taxonomy_type', 'page', __('Post Parent'));
 								//Loop through all of the taxonomies in the array
 								foreach($wp_taxonomies as $taxonomy)
 								{
+									//Check for non-public taxonomies
+									if(!apply_filters('bcn_show_tax_private', $taxonomy->public, $taxonomy->name))
+									{
+										continue;
+									}
 									//We only want custom taxonomies
 									if($taxonomy->object_type == $post_type->name || in_array($post_type->name, $taxonomy->object_type))
 									{
@@ -473,61 +600,98 @@ class bcn_admin extends mtekk_adminKit
 									}
 								}
 							?>
-							<span class="setting-description"><?php _e('The taxonomy which the breadcrumb trail will show.', 'breadcrumb-navxt'); ?></span>
+							<p class="description">
+							<?php
+							if($post_type->hierarchical)
+							{
+								_e('The hierarchy which the breadcrumb trail will show.', 'breadcrumb-navxt'); 
+							}
+							else
+							{
+								_e('The hierarchy which the breadcrumb trail will show. Note that the "Post Parent" option may require an additional plugin to behave as expected since this is a non-hierarchical post type.', 'breadcrumb-navxt');
+							}
+							?>
+							</p>
 						</td>
 					</tr>
 				</table>
-			</fieldset>
 					<?php
 				}
-			}?>
+			}
+			do_action($this->unique_prefix . '_after_settings_tab_post');
+			?>
+			</fieldset>
 			<fieldset id="tax" class="bcn_options alttab">
-				<h3><?php _e('Categories &amp; Tags', 'breadcrumb-navxt'); ?></h3>
+				<h3 class="tab-title" title="<?php _e('The settings for all taxonomies (including Categories, Tags, and custom taxonomies) are located under this tab.', 'breadcrumb-navxt');?>"><?php _e('Taxonomies', 'breadcrumb-navxt'); ?></h3>
+				<h3><?php _e('Categories', 'breadcrumb-navxt'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(__('Category Template', 'breadcrumb-navxt'), 'Hcategory_template', '64', false, __('The template for category breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Category Template (Unlinked)', 'breadcrumb-navxt'), 'Hcategory_template_no_anchor', '64', false, __('The template for category breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_text(__('Tag Template', 'breadcrumb-navxt'), 'Hpost_tag_template', '64', false, __('The template for tag breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Tag Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_tag_template_no_anchor', '64', false, __('The template for tag breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_text(__('Category Template', 'breadcrumb-navxt'), 'Hcategory_template', 'large-text', false, __('The template for category breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Category Template (Unlinked)', 'breadcrumb-navxt'), 'Hcategory_template_no_anchor', 'large-text', false, __('The template for category breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
 					?>
 				</table>
-			</fieldset>
+				<h3><?php _e('Tags', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php
+						$this->input_text(__('Tag Template', 'breadcrumb-navxt'), 'Hpost_tag_template', 'large-text', false, __('The template for tag breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Tag Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_tag_template_no_anchor', 'large-text', false, __('The template for tag breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+					?>
+				</table>
+				<h3><?php _e('Post Formats', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php
+						$this->input_text(__('Post Format Template', 'breadcrumb-navxt'), 'Hpost_format_template', 'large-text', false, __('The template for post format breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Post Format Template (Unlinked)', 'breadcrumb-navxt'), 'Hpost_format_template_no_anchor', 'large-text', false, __('The template for post_format breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+					?>
+				</table>
 			<?php
 			//Loop through all of the taxonomies in the array
 			foreach($wp_taxonomies as $taxonomy)
 			{
+				//Check for non-public taxonomies
+				if(!apply_filters('bcn_show_tax_private', $taxonomy->public, $taxonomy->name))
+				{
+					continue;
+				}
 				//We only want custom taxonomies
 				if(!$taxonomy->_builtin)
 				{
+					$label_lc = mb_strtolower($taxonomy->label, 'UTF-8');
 				?>
-			<fieldset id="<?php echo $taxonomy->name; ?>" class="bcn_options alttab">
-				<h3><?php echo mb_convert_case(__($taxonomy->label), MB_CASE_TITLE, 'UTF-8'); ?></h3>
+				<h3><?php echo mb_convert_case($taxonomy->label, MB_CASE_TITLE, 'UTF-8'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(sprintf(__('%s Template', 'breadcrumb-navxt'), $taxonomy->labels->singular_name), 'H' . $taxonomy->name . '_template', '64', false, sprintf(__('The template for %s breadcrumbs.', 'breadcrumb-navxt'), strtolower(__($taxonomy->label))));
-						$this->input_text(sprintf(__('%s Template (Unlinked)', 'breadcrumb-navxt'), $taxonomy->labels->singular_name), 'H' . $taxonomy->name . '_template_no_anchor', '64', false, sprintf(__('The template for %s breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'), strtolower(__($taxonomy->label))));
+						$this->input_text(sprintf(__('%s Template', 'breadcrumb-navxt'), $taxonomy->labels->singular_name), 'H' . $taxonomy->name . '_template', 'large-text', false, sprintf(__('The template for %s breadcrumbs.', 'breadcrumb-navxt'), $label_lc));
+						$this->input_text(sprintf(__('%s Template (Unlinked)', 'breadcrumb-navxt'), $taxonomy->labels->singular_name), 'H' . $taxonomy->name . '_template_no_anchor', 'large-text', false, sprintf(__('The template for %s breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'), $label_lc));
 					?>
 				</table>
-			</fieldset>
 				<?php
 				}
 			}
-			?>
+			do_action($this->unique_prefix . '_after_settings_tab_taxonomy'); ?>
+			</fieldset>
 			<fieldset id="miscellaneous" class="bcn_options">
+				<h3 class="tab-title" title="<?php _e('The settings for author and date archives, searches, and 404 pages are located under this tab.', 'breadcrumb-navxt');?>"><?php _e('Miscellaneous', 'breadcrumb-navxt'); ?></h3>
+				<h3><?php _e('Author Archives', 'breadcrumb-navxt'); ?></h3>
+				<table class="form-table">
+					<?php
+						$this->input_text(__('Author Template', 'breadcrumb-navxt'), 'Hauthor_template', 'large-text', false, __('The template for author breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Author Template (Unlinked)', 'breadcrumb-navxt'), 'Hauthor_template_no_anchor', 'large-text', false, __('The template for author breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_select(__('Author Display Format', 'breadcrumb-navxt'), 'Sauthor_name', array("display_name", "nickname", "first_name", "last_name"), false, __('display_name uses the name specified in "Display name publicly as" under the user profile the others correspond to options in the user profile.', 'breadcrumb-navxt'));
+					?>
+				</table>
 				<h3><?php _e('Miscellaneous', 'breadcrumb-navxt'); ?></h3>
 				<table class="form-table">
 					<?php
-						$this->input_text(__('Author Template', 'breadcrumb-navxt'), 'Hauthor_template', '64', false, __('The template for author breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Author Template (Unlinked)', 'breadcrumb-navxt'), 'Hauthor_template_no_anchor', '64', false, __('The template for author breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_select(__('Author Display Format', 'breadcrumb-navxt'), 'Sauthor_name', array("display_name", "nickname", "first_name", "last_name"), false, __('display_name uses the name specified in "Display name publicly as" under the user profile the others correspond to options in the user profile.', 'breadcrumb-navxt'));
-						$this->input_text(__('Date Template', 'breadcrumb-navxt'), 'Hdate_template', '64', false, __('The template for date breadcrumbs.', 'breadcrumb-navxt'));
-						$this->input_text(__('Date Template (Unlinked)', 'breadcrumb-navxt'), 'Hdate_template_no_anchor', '64', false, __('The template for date breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_text(__('Search Template', 'breadcrumb-navxt'), 'Hsearch_template', '64', false, __('The anchor template for search breadcrumbs, used only when the search results span several pages.', 'breadcrumb-navxt'));
-						$this->input_text(__('Search Template (Unlinked)', 'breadcrumb-navxt'), 'Hsearch_template_no_anchor', '64', false, __('The anchor template for search breadcrumbs, used only when the search results span several pages and the breadcrumb is not linked.', 'breadcrumb-navxt'));
-						$this->input_text(__('404 Title', 'breadcrumb-navxt'), 'S404_title', '32');
-						$this->input_text(__('404 Template', 'breadcrumb-navxt'), 'H404_template', '64', false, __('The template for 404 breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Date Template', 'breadcrumb-navxt'), 'Hdate_template', 'large-text', false, __('The template for date breadcrumbs.', 'breadcrumb-navxt'));
+						$this->input_text(__('Date Template (Unlinked)', 'breadcrumb-navxt'), 'Hdate_template_no_anchor', 'large-text', false, __('The template for date breadcrumbs, used only when the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_text(__('Search Template', 'breadcrumb-navxt'), 'Hsearch_template', 'large-text', false, __('The anchor template for search breadcrumbs, used only when the search results span several pages.', 'breadcrumb-navxt'));
+						$this->input_text(__('Search Template (Unlinked)', 'breadcrumb-navxt'), 'Hsearch_template_no_anchor', 'large-text', false, __('The anchor template for search breadcrumbs, used only when the search results span several pages and the breadcrumb is not linked.', 'breadcrumb-navxt'));
+						$this->input_text(__('404 Title', 'breadcrumb-navxt'), 'S404_title', 'regular-text');
+						$this->input_text(__('404 Template', 'breadcrumb-navxt'), 'H404_template', 'large-text', false, __('The template for 404 breadcrumbs.', 'breadcrumb-navxt'));
 					?>
 				</table>
+				<?php do_action($this->unique_prefix . '_after_settings_tab_miscellaneous'); ?>
 			</fieldset>
 			</div>
 			<p class="submit"><input type="submit" class="button-primary" name="bcn_admin_options" value="<?php esc_attr_e('Save Changes') ?>" /></p>
@@ -538,12 +702,19 @@ class bcn_admin extends mtekk_adminKit
 		</div>
 		<?php
 	}
+	function opts_fix(&$opts)
+	{
+		if($opts['amax_title_length'] < 1)
+		{
+			$opts['amax_title_length'] = 1;
+		}
+	}
 	function opts_update_prebk(&$opts)
 	{
 		//Add custom post types
-		$this->find_posttypes($this->opt);
+		$this->find_posttypes($opts);
 		//Add custom taxonomy types
-		$this->find_taxonomies($this->opt);
+		$this->find_taxonomies($opts);
 	}
 	/**
 	 * Places settings into $opts array, if missing, for the registered post types
@@ -556,6 +727,11 @@ class bcn_admin extends mtekk_adminKit
 		//Loop through all of the post types in the array
 		foreach($wp_post_types as $post_type)
 		{
+			//Check for non-public CPTs
+			if(!apply_filters('bcn_show_cpt_private', $post_type->public, $post_type->name))
+			{
+				continue;
+			}
 			//We only want custom post types
 			if(!$post_type->_builtin)
 			{
@@ -563,7 +739,7 @@ class bcn_admin extends mtekk_adminKit
 				if(!array_key_exists('Hpost_' . $post_type->name . '_template', $opts) || !$post_type->hierarchical && !array_key_exists('Spost_' . $post_type->name . '_taxonomy_type', $opts))
 				{
 					//Add the necessary option array members
-					$opts['Hpost_' . $post_type->name . '_template'] = __('<a title="Go to %title%." href="%link%">%htitle%</a>', 'breadcrumb-navxt');
+					$opts['Hpost_' . $post_type->name . '_template'] = __('<a title="Go to %ftitle%." href="%link%">%htitle%</a>', 'breadcrumb-navxt');
 					$opts['Hpost_' . $post_type->name . '_template_no_anchor'] = __('%htitle%', 'breadcrumb-navxt');
 					$opts['bpost_' . $post_type->name . '_archive_display'] = $post_type->has_archive;
 					//Do type dependent tasks
@@ -571,30 +747,39 @@ class bcn_admin extends mtekk_adminKit
 					{
 						//Set post_root for hierarchical types
 						$opts['apost_' . $post_type->name . '_root'] = get_option('page_on_front');
+						//Default to displaying a 'taxonomy'
+						$opts['bpost_' . $post_type->name . '_taxonomy_display'] = true;
+						//The 'taxonomy' is the page/post hierarchy for hierarchical post types
+						$opts['Spost_' . $post_type->name . '_taxonomy_type'] = 'page';
 					}
 					//If it is flat, we need a taxonomy selection
 					else
 					{
 						//Set post_root for flat types
 						$opts['apost_' . $post_type->name . '_root'] = get_option('page_for_posts');
-					}
-					//Default to not displaying a taxonomy
-					$opts['bpost_' . $post_type->name . '_taxonomy_display'] = false;
-					//Loop through all of the possible taxonomies
-					foreach($wp_taxonomies as $taxonomy)
-					{
-						//Activate the first taxonomy valid for this post type and exit the loop
-						if($taxonomy->object_type == $post_type->name || in_array($post_type->name, $taxonomy->object_type))
+						//Default to not displaying a taxonomy
+						$opts['bpost_' . $post_type->name . '_taxonomy_display'] = false;
+						//Loop through all of the possible taxonomies
+						foreach($wp_taxonomies as $taxonomy)
 						{
-							$opts['bpost_' . $post_type->name . '_taxonomy_display'] = true;
-							$opts['Spost_' . $post_type->name . '_taxonomy_type'] = $taxonomy->name;
-							break;
+							//Check for non-public taxonomies
+							if(!apply_filters('bcn_show_tax_private', $taxonomy->public, $taxonomy->name))
+							{
+								continue;
+							}
+							//Activate the first taxonomy valid for this post type and exit the loop
+							if($taxonomy->object_type == $post_type->name || in_array($post_type->name, $taxonomy->object_type))
+							{
+								$opts['bpost_' . $post_type->name . '_taxonomy_display'] = true;
+								$opts['Spost_' . $post_type->name . '_taxonomy_type'] = $taxonomy->name;
+								break;
+							}
 						}
 					}
 					//If there are no valid taxonomies for this type, we default to not displaying taxonomies for this post type
 					if(!isset($opts['Spost_' . $post_type->name . '_taxonomy_type']))
 					{
-						$opts['Spost_' . $post_type->name . '_taxonomy_type'] = 'date';
+						$opts['Spost_' . $post_type->name . '_taxonomy_type'] = 'page';
 					}
 				}
 			}
@@ -611,6 +796,11 @@ class bcn_admin extends mtekk_adminKit
 		//We'll add our custom taxonomy stuff at this time
 		foreach($wp_taxonomies as $taxonomy)
 		{
+			//Check for non-public taxonomies
+			if(!apply_filters('bcn_show_tax_private', $taxonomy->public, $taxonomy->name))
+			{
+				continue;
+			}
 			//We only want custom taxonomies
 			if(!$taxonomy->_builtin)
 			{
@@ -618,18 +808,30 @@ class bcn_admin extends mtekk_adminKit
 				if(!array_key_exists('H' . $taxonomy->name . '_template', $opts))
 				{
 					//Add the necessary option array members
-					$opts['H' . $taxonomy->name . '_template'] = __(sprintf('<a title="Go to the %%title%% %s archives." href="%%link%%">%%htitle%%</a>', $taxonomy->labels->singular_name), 'breadcrumb-navxt');
+					$opts['H' . $taxonomy->name . '_template'] = __(sprintf('<a title="Go to the %%ftitle%% %s archives." href="%%link%%">%%htitle%%</a>', $taxonomy->labels->singular_name), 'breadcrumb-navxt');
 					$opts['H' . $taxonomy->name . '_template_no_anchor'] = __(sprintf('%%htitle%%', $taxonomy->labels->singular_name), 'breadcrumb-navxt');
 				}
 			}
 		}
 	}
 	/**
+	 * Hooks into the theme hook alliance tha_breadcrumb_navigation filter and replaces the trail
+	 * with one generated by Breadcrumb NavXT
+	 * 
+	 * @param string $bradcrumb_trail The string breadcrumb trail that we will replace
+	 * @return string The Breadcrumb NavXT assembled breadcrumb trail
+	 */
+	function tha_compat($breadcrumb_trail)
+	{
+		//Return our breadcrumb trail
+		return $this->display(true);
+	}
+	/**
 	 * Outputs the breadcrumb trail
 	 * 
-	 * @param  (bool)   $return Whether to return or echo the trail.
-	 * @param  (bool)   $linked Whether to allow hyperlinks in the trail or not.
-	 * @param  (bool)	$reverse Whether to reverse the output or not.
+	 * @param bool $return Whether to return or echo the trail.
+	 * @param bool $linked Whether to allow hyperlinks in the trail or not.
+	 * @param bool $reverse Whether to reverse the output or not.
 	 */
 	function display($return = false, $linked = true, $reverse = false)
 	{
@@ -642,10 +844,10 @@ class bcn_admin extends mtekk_adminKit
 	/**
 	 * Outputs the breadcrumb trail
 	 * 
-	 * @since  3.2.0
-	 * @param  (bool)   $return Whether to return or echo the trail.
-	 * @param  (bool)   $linked Whether to allow hyperlinks in the trail or not.
-	 * @param  (bool)	$reverse Whether to reverse the output or not.
+	 * @since 3.2.0
+	 * @param bool $return Whether to return or echo the trail.
+	 * @param bool $linked Whether to allow hyperlinks in the trail or not.
+	 * @param bool	$reverse Whether to reverse the output or not.
 	 */
 	function display_list($return = false, $linked = true, $reverse = false)
 	{
